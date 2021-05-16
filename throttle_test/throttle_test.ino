@@ -5,7 +5,7 @@
 /*# TBAG 2021         #*/
 /*#####################*/
 
-#define DEBUG
+//#define DEBUG
 
 // set all the pins
 const unsigned char RpPin=12;     // red positive pin
@@ -28,7 +28,7 @@ class procedures{
     // methods
     void setPhase(float);
     // fixed constants
-    const float maxRPM=4000;      // maximum RPM for tachometers
+    const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 
     // throttle controls
     float throtPos1;  // throttle position, in %
@@ -55,18 +55,32 @@ void procedures::setPhase(float thisTime)
   float l=0,fracL=0;
   const float third=1.0/3.0;
 
-  l=rpm1/maxRPM;   /*wavelength in seconds*/
-  fracL=(tim/l)-(float)(int)(tim/l);     /* fraction of a wavelength*/
+  if(rpm1>0.000001)l=1.0/(rpm1*maxRPM);   /*wavelength in seconds*/
+  else             l=10000.0;
+  fracL=(tim/l)-(float)(unsigned long int)(tim/l);     /* fraction of a wavelength*/
 
-  if(fracL<0.5)rDir=1;   // red
-  else         rDir=-1;
-  if((fracL>=third)&&(fracL<(third+0.5)))gDir=1;  // green
-  else                                   gDir=-1;
-  if((fracL>(2.0*third))||(fracL<(2.0*third-0.5)))bDir=1; // blue
-  else                                            bDir=-1;
+  if(l<600.0){
+    if(fracL<0.5)rDir=1;   // red
+    else         rDir=-1;
+    if((fracL>=third)&&(fracL<(third+0.5)))gDir=1;  // green
+    else                                   gDir=-1;
+    if((fracL>(2.0*third))||(fracL<(2.0*third-0.5)))bDir=1; // blue
+    else                                            bDir=-1;
+  }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG
-  Serial.print("phase ");
+  //Serial.print("Pos ");
+  //Serial.print(throtPos1); 
+  //Serial.print(" RPM ");
+  //Serial.print(rpm1,4);
+  //Serial.print(" wavelength ");
+  //Serial.print(l,10);
+  //Serial.print(" frac ");
+  //Serial.print(fracL);
+  //Serial.print(" time ");
+  Serial.print(tim,4);
+  Serial.print(" ");
+  //Serial.print(" phase ");
   Serial.print((int)rDir);
   Serial.print(" ");
   Serial.print((int)gDir);

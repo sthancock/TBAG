@@ -10,10 +10,16 @@
 const unsigned char RpPin = 12;  // red positive pin
 const unsigned char RnPin = 6;   // red negative pin
 const unsigned char GpPin = 11;  // green
-const unsigned char BLPin = 5;   // green
-const unsigned char CHPin = 10;  // blue
-const unsigned char CLPin = 4;   // blue
-const unsigned char delayPin = A5;
+const unsigned char GnPin = 5;   // green
+const unsigned char BpPin = 10;  // blue
+const unsigned char BnPin = 4;   // blue
+const unsigned char throt1Pin = A5;
+
+class procedures{
+  const float maxRPM=4000;      // maximum RPM for tachometers
+  const float minThrotV=1024.0; // maximum throttle input voltage
+  
+}proc;
 
 void setup() {
   // put your setup code here, to run once:

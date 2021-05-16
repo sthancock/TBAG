@@ -55,11 +55,10 @@ void procedures::setPhase(float thisTime)
   float l=0,fracL=0;
   const float third=1.0/3.0;
 
-  if(rpm1>0.000001)l=1.0/(rpm1*maxRPM);   /*wavelength in seconds*/
-  else             l=10000.0;
-  fracL=(tim/l)-(float)(unsigned long int)(tim/l);     /* fraction of a wavelength*/
-
-  if(l<600.0){
+  if(rpm1>0.001){
+    l=1.0/rpm1;   /*wavelength in seconds*/
+    fracL=(tim/l)-(float)(unsigned long int)(tim/l);     /* fraction of a wavelength*/
+    
     if(fracL<0.5)rDir=1;   // red
     else         rDir=-1;
     if((fracL>=third)&&(fracL<(third+0.5)))gDir=1;  // green
@@ -69,15 +68,11 @@ void procedures::setPhase(float thisTime)
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG
-  //Serial.print("Pos ");
-  //Serial.print(throtPos1); 
-  //Serial.print(" RPM ");
-  //Serial.print(rpm1,4);
-  //Serial.print(" wavelength ");
-  //Serial.print(l,10);
-  //Serial.print(" frac ");
-  //Serial.print(fracL);
-  //Serial.print(" time ");
+  Serial.print("Pos ");
+  Serial.print(throtPos1); 
+  Serial.print(" RPM ");
+  Serial.print(rpm1*60.0,4);
+  Serial.print(" time ");
   Serial.print(tim,4);
   Serial.print(" ");
   //Serial.print(" phase ");
@@ -108,7 +103,7 @@ void procedures::setup()
   temp1=0.0;
   rDir=gDir=bDir=0;
 
-  // display, if needed
+  // setup display, if needed
   #ifdef DEBUG
   Serial.begin(9600);
   #endif
@@ -122,7 +117,7 @@ void procedures::setup()
 void procedures::readInputs()
 {
   //throttle
-  throtPos1=(float)map(analogRead(throt1Pin), 0, 1024, 0, 100);
+  throtPos1=(float)map(analogRead(throt1Pin), 0, 1024, 0, maxRPM);
 
   return;
 }

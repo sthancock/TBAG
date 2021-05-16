@@ -13,7 +13,7 @@ const unsigned char GpPin = 11;  // green
 const unsigned char GnPin = 5;   // green
 const unsigned char BpPin = 10;  // blue
 const unsigned char BnPin = 4;   // blue
-const unsigned char throt1Pin = A5;
+const unsigned char throt1Pin = A5; // input for throttle 1
 
 class procedures{
   const float maxRPM=4000;      // maximum RPM for tachometers

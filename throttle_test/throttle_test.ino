@@ -35,7 +35,7 @@ class procedures{
     char cockPos;     // fuel cock position. On/off
   
     // throttle internals
-    const float tRate=100.0/5.0;       // throttle change rate, in % per second
+    const float tRate=100.0/50.0;       // throttle change rate, in % per second
     float tim;         // time now
     char rDir;         // red tacho directions
     char gDir;         // green tacho directions
@@ -63,7 +63,17 @@ void procedures::setPhase(float thisTime)
   if((fracL>=third)&&(fracL<(third+0.5)))gDir=1;  // green
   else                                   gDir=-1;
   if((fracL>(2.0*third))||(fracL<(2.0*third-0.5)))bDir=1; // blue
-  else                                             bDir=-1;
+  else                                            bDir=-1;
+
+  #ifdef DEBUG
+  Serial.print("phase ");
+  Serial.print((int)rDir);
+  Serial.print(" ");
+  Serial.print((int)gDir);
+  Serial.print(" ");
+  Serial.print((int)bDir);
+  Serial.print("\n");
+  #endif
 
   return;
 }
@@ -82,7 +92,13 @@ void procedures::setup()
   // outputs
   rpm1=0.0;     // everything off
   temp1=0.0;
+  rDir=gDir=bDir=0;
 
+  // display, if needed
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
+  
   return;
 }
 
@@ -106,7 +122,7 @@ void procedures::determineState()
   float thisTime=0,dTime=0;
 
   // time change since last call?
-  thisTime=micros()/1000.0;
+  thisTime=micros()/1000000.0;
   dTime=thisTime-tim;
 
   // determine delta fuel
@@ -118,6 +134,20 @@ void procedures::determineState()
   if(rpm1>50.0)temp1=50.0;
   else         temp1=0.0;
 
+  //set tachometer phase
+  setPhase(thisTime);
+
+  #ifdef DEBUG
+  /*Serial.print("ThrotPos: ");
+  Serial.print(throtPos1);
+  Serial.print(" RPM: ");
+  Serial.print(rpm1);
+  Serial.print(" dtime ");
+  Serial.print(dTime);
+  Serial.print(" dFuel ");
+  Serial.print(dFuel);
+  Serial.print("\n");*/
+  #endif
   // update time
   tim=thisTime;
   return;
@@ -130,7 +160,7 @@ void procedures::determineState()
 void procedures::writeState()
 {
   // determine phase for RPM
-
+  
   // is this a change?
   // update this so a digitalWrite is only done for a direction change
 
@@ -165,6 +195,15 @@ void procedures::writeState()
     digitalWrite(BpPin,LOW);
     digitalWrite(BnPin,LOW);
   }
+
+  #ifdef DEBUG
+  //Serial.print("ThrotPos: ");
+  //Serial.print(throtPos1);
+  //Serial.print(" RPM: ");
+  //Serial.print(rpm1);
+  //Serial.print("\n");
+  #endif
+  
   return;
 }
 
@@ -183,7 +222,15 @@ void setup() {
 
   // set positions etc.
   proc.setup();
-  
+
+
+  // set all pins LOW
+  digitalWrite(RpPin,LOW);
+  digitalWrite(RnPin,LOW);
+  digitalWrite(GpPin,LOW);
+  digitalWrite(GnPin,LOW);
+  digitalWrite(BpPin,LOW);
+  digitalWrite(BnPin,LOW);
 }
 
 /*##############################*/

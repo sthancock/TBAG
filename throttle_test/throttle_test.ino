@@ -5,7 +5,8 @@
 /*# TBAG 2021         #*/
 /*#####################*/
 
-//#define DEBUG
+
+#define DEBUG
 
 // set all the pins
 const unsigned char RpPin=12;     // red positive pin
@@ -26,7 +27,7 @@ class procedures{
 
   private:
     // methods
-    void setPhase(float);
+    void setPhase(float,float);
     // fixed constants
     const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 
@@ -37,6 +38,7 @@ class procedures{
     // throttle internals
     const float tRate=100.0/50.0;       // throttle change rate, in % per second
     float tim;         // time now
+    float tachAng;     // phase angle of tachometer
     char rDir;         // red tacho directions
     char gDir;         // green tacho directions
     char bDir;         // blue tacho directions
@@ -50,21 +52,23 @@ class procedures{
 /*##############################*/
 /*determine tachometer phases*/
 
-void procedures::setPhase(float thisTime)
+void procedures::setPhase(float thisTime,float dTime)
 {
-  float l=0,fracL=0;
-  const float third=1.0/3.0;
+  float dAng=0;  // angle change rate
 
   if(rpm1>0.001){
-    l=1.0/rpm1;   /*wavelength in seconds*/
-    fracL=(tim/l)-(float)(unsigned long int)(tim/l);     /* fraction of a wavelength*/
+    dAng=2.0*M_PI*rpm1;
+    tachAng+=dAng*dTime;
+    while(tachAng>=2.0*M_PI){
+      tachAng=tachAng-2.0*M_PI;
+    }
     
-    if(fracL<0.5)rDir=1;   // red
-    else         rDir=-1;
-    if((fracL>=third)&&(fracL<(third+0.5)))gDir=1;  // green
-    else                                   gDir=-1;
-    if((fracL>(2.0*third))||(fracL<(2.0*third-0.5)))bDir=1; // blue
-    else                                            bDir=-1;
+    if(sin(tachAng)>0.0)rDir=1;
+    else                rDir=-1;
+    if(sin(tachAng+2.0*M_PI/3.0)>0.0)gDir=1;
+    else                             gDir=-1;
+    if(sin(tachAng+4.0*M_PI/3.0)>0.0)bDir=1;
+    else                             bDir=-1;
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG
@@ -74,6 +78,14 @@ void procedures::setPhase(float thisTime)
   Serial.print(rpm1*60.0,4);
   Serial.print(" time ");
   Serial.print(tim,4);
+  Serial.print(" ang ");
+  Serial.print(tachAng*180.0/M_PI);
+  Serial.print(" amp ");
+  Serial.print(sin(tachAng),4);
+  Serial.print(" ");
+  Serial.print(sin(tachAng+2.0*M_PI/3.0),4);
+  Serial.print(" ");
+  Serial.print(sin(tachAng+4.0*M_PI/3.0),4);
   Serial.print(" ");
   //Serial.print(" phase ");
   Serial.print((int)rDir);
@@ -97,6 +109,7 @@ void procedures::setup()
   cockPos=1;     // hard-coded open for now, as now switch
 
   // internals
+  tachAng=0.0;
   
   // outputs
   rpm1=0.0;     // everything off
@@ -129,6 +142,7 @@ void procedures::determineState()
 {
   float dFuel=0;
   float thisTime=0,dTime=0;
+  
 
   // time change since last call?
   thisTime=micros()/1000000.0;
@@ -144,7 +158,7 @@ void procedures::determineState()
   else         temp1=0.0;
 
   //set tachometer phase
-  setPhase(thisTime);
+  setPhase(thisTime,dTime);
 
   #ifdef DEBUG
   /*Serial.print("ThrotPos: ");

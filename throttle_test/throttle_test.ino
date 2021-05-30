@@ -216,7 +216,7 @@ void procedures::writeState()
     digitalWrite(GpPin,LOW);
     digitalWrite(GnPin,LOW);
   }
-  if(bDir>0){  // green phase
+  if(bDir>0){  // blue phase
     digitalWrite(BpPin,HIGH);
     digitalWrite(BnPin,LOW);
   }else if(bDir<0){

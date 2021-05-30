@@ -55,6 +55,7 @@ class procedures{
 void procedures::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
+  float rAng=0,gAng=0,bAng=0;
 
   if(rpm1>0.001){
     dAng=2.0*M_PI*rpm1;
@@ -63,12 +64,19 @@ void procedures::setPhase(float thisTime,float dTime)
       tachAng=tachAng-2.0*M_PI;
     }
     
-    if(sin(tachAng)>0.0)rDir=1;
-    else                rDir=-1;
-    if(sin(tachAng+2.0*M_PI/3.0)>0.0)gDir=1;
-    else                             gDir=-1;
-    if(sin(tachAng+4.0*M_PI/3.0)>0.0)bDir=1;
-    else                             bDir=-1;
+    rAng=sin(tachAng);
+    gAng=sin(tachAng+2.0*M_PI/3.0);
+    bAng=sin(tachAng+4.0*M_PI/3.0);
+
+    if(rAng>0.3)      rDir=1;
+    else if(rAng<-0.3)rDir=-1;
+    else              rDir=0;
+    if(gAng>0.3)      gDir=1;
+    else if(gAng<-0.3)gDir=-1;
+    else              gDir=0;
+    if(bAng>0.3)      bDir=1;
+    else if(bAng<-0.3)bDir=-1;
+    else              bDir=0;
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG

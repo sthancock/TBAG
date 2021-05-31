@@ -9,6 +9,12 @@
 //#define DEBUG
 
 
+
+
+
+/*#####################################*/
+/*hold data and functions for engines*/
+
 class engine{
   public:
     // methods
@@ -49,8 +55,9 @@ class engine{
     unsigned char throt1Pin; // input for throttle
 };
 
-engine eng1;
-engine eng2;
+
+
+
 
 /*##############################*/
 /*determine tachometer phases*/
@@ -267,6 +274,13 @@ void engine::writeState()
   
   return;
 }
+
+
+/*##############################*/
+/*global classes to hold data*/
+engine eng1;
+engine eng2;
+
 
 /*##############################*/
 /*set things up*/

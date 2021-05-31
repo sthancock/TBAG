@@ -17,7 +17,7 @@ const unsigned char BpPin=10;     // blue
 const unsigned char BnPin=4;      // blue
 const unsigned char throt1Pin=A5; // input for throttle 1
 
-class procedures{
+class engine{
   public:
     // methods
     void setup();
@@ -47,12 +47,15 @@ class procedures{
     float rpm1;        // tachometer RPM, in %
     float temp1;       // exhaust temperature
   
-}proc;
+};
+
+engine eng1;
+engine eng2;
 
 /*##############################*/
 /*determine tachometer phases*/
 
-void procedures::setPhase(float thisTime,float dTime)
+void engine::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
   float rAng=0,gAng=0,bAng=0;
@@ -110,7 +113,7 @@ void procedures::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void procedures::setup()
+void engine::setup()
 {
   // inputs
   throtPos1=0.0; // starts with throttle closed
@@ -135,7 +138,7 @@ void procedures::setup()
 /*##############################*/
 /*read input controls*/
 
-void procedures::readInputs()
+void engine::readInputs()
 {
   //throttle
   throtPos1=(float)map(analogRead(throt1Pin), 0, 1024, 0, maxRPM);
@@ -146,7 +149,7 @@ void procedures::readInputs()
 /*##############################*/
 /*adjust the states*/
 
-void procedures::determineState()
+void engine::determineState()
 {
   float dFuel=0;
   float thisTime=0,dTime=0;
@@ -188,7 +191,7 @@ void procedures::determineState()
 /*##############################*/
 /*write state*/
 
-void procedures::writeState()
+void engine::writeState()
 {
   // determine phase for RPM
   
@@ -252,7 +255,8 @@ void setup() {
   pinMode(throt1Pin, INPUT);
 
   // set positions etc.
-  proc.setup();
+  eng1.setup();
+  //eng2.setup();
 
 
   // set all pins LOW
@@ -270,13 +274,13 @@ void setup() {
 void loop() {
 
   // read controls
-  proc.readInputs();
+  eng1.readInputs();
 
   // determine state
-  proc.determineState();
+  eng1.determineState();
 
   // write outputs
-  proc.writeState();
+  eng1.writeState();
   
 }/*main loop*/
 

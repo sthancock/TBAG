@@ -6,21 +6,13 @@
 /*#####################*/
 
 
-#define DEBUG
+//#define DEBUG
 
-// set all the pins
-const unsigned char RpPin=12;     // red positive pin
-const unsigned char RnPin=6;      // red negative pin
-const unsigned char GpPin=11;     // green
-const unsigned char GnPin=5;      // green
-const unsigned char BpPin=10;     // blue
-const unsigned char BnPin=4;      // blue
-const unsigned char throt1Pin=A5; // input for throttle 1
 
 class engine{
   public:
     // methods
-    void setup();
+    void setup(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char);
     void readInputs();
     void determineState();
     void writeState();
@@ -46,7 +38,15 @@ class engine{
     // throttle outputs
     float rpm1;        // tachometer RPM, in %
     float temp1;       // exhaust temperature
-  
+
+    // pins
+    unsigned char RpPin;     // red positive pin
+    unsigned char RnPin;     // red negative pin
+    unsigned char GpPin;     // green
+    unsigned char GnPin;     // green
+    unsigned char BpPin;     // blue
+    unsigned char BnPin;     // blue
+    unsigned char throt1Pin; // input for throttle 1
 };
 
 engine eng1;
@@ -113,8 +113,35 @@ void engine::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void engine::setup()
+void engine::setup(unsigned char inRpPin,unsigned char inRnPin,unsigned char inGpPin,\
+                   unsigned char inGnPin,unsigned char inBpPin,unsigned char inBnPin,unsigned char inthrot1Pin)
 {
+  // set bin variables
+  RpPin=inRpPin;
+  RnPin=inRnPin;
+  GpPin=inGpPin;
+  GnPin=inGnPin;
+  BpPin=inBpPin;
+  BnPin=inBnPin;
+  throt1Pin=inthrot1Pin;
+
+  // set pin modes
+  pinMode(RpPin, OUTPUT);
+  pinMode(RnPin, OUTPUT);
+  pinMode(GpPin, OUTPUT);
+  pinMode(GnPin, OUTPUT);
+  pinMode(BpPin, OUTPUT);
+  pinMode(BnPin, OUTPUT);
+  pinMode(throt1Pin, INPUT);
+
+  // set all pins LOW
+  digitalWrite(RpPin,LOW);
+  digitalWrite(RnPin,LOW);
+  digitalWrite(GpPin,LOW);
+  digitalWrite(GnPin,LOW);
+  digitalWrite(BpPin,LOW);
+  digitalWrite(BnPin,LOW);
+  
   // inputs
   throtPos1=0.0; // starts with throttle closed
   cockPos=1;     // hard-coded open for now, as now switch
@@ -244,28 +271,14 @@ void engine::writeState()
 /*##############################*/
 /*set things up*/
 
-void setup() {
-  // allocate pins
-  pinMode(RpPin, OUTPUT);
-  pinMode(RnPin, OUTPUT);
-  pinMode(GpPin, OUTPUT);
-  pinMode(GnPin, OUTPUT);
-  pinMode(BpPin, OUTPUT);
-  pinMode(BnPin, OUTPUT);
-  pinMode(throt1Pin, INPUT);
+void setup()
+{
+
 
   // set positions etc.
-  eng1.setup();
-  //eng2.setup();
+  eng1.setup(12,6,11,5,10,4,A5);
+  eng2.setup(1,2,3,7,9,13,A6);
 
-
-  // set all pins LOW
-  digitalWrite(RpPin,LOW);
-  digitalWrite(RnPin,LOW);
-  digitalWrite(GpPin,LOW);
-  digitalWrite(GnPin,LOW);
-  digitalWrite(BpPin,LOW);
-  digitalWrite(BnPin,LOW);
 }
 
 /*##############################*/
@@ -275,12 +288,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
+  eng2.readInputs();
 
   // determine state
   eng1.determineState();
+  eng2.determineState();
 
   // write outputs
   eng1.writeState();
+  eng2.writeState();
   
 }/*main loop*/
 

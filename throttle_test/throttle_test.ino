@@ -46,7 +46,7 @@ class engine{
     unsigned char GnPin;     // green
     unsigned char BpPin;     // blue
     unsigned char BnPin;     // blue
-    unsigned char throt1Pin; // input for throttle 1
+    unsigned char throt1Pin; // input for throttle
 };
 
 engine eng1;

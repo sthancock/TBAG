@@ -11,10 +11,10 @@
 /*#####################################*/
 /*global variables*/
 
-char sinArr[360];   // pre-calculated array of sine +/-
 const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
-const float tRate=100.0/50.0;       // throttle change rate, in % per second
-
+const float tRate=100.0/50.0;      // throttle change rate, in % per second
+const int nAngSteps=120;           // number of angle steps in tachometer array
+char sinArr[nAngSteps];            // pre-calculated array of sine +/-
 
 /*#####################################*/
 /*hold data and functions for engines*/
@@ -74,9 +74,9 @@ void engine::setPhase(float thisTime,float dTime)
       tachAng-=360000.0;        // computational time
     }
 
-    rDir=sinArr[(int)tachAng%360];
-    bDir=sinArr[(int)(tachAng+120.0)%360];
-    gDir=sinArr[(int)(tachAng+240.0)%360];
+    rDir=sinArr[(int)tachAng%nAngSteps];
+    bDir=sinArr[(int)(tachAng+120.0)%nAngSteps];
+    gDir=sinArr[(int)(tachAng+240.0)%nAngSteps];
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG  // write to display to monitor
@@ -282,8 +282,8 @@ void calcSin()
   int i=0;
   float y=0;
 
-  for(i=0;i<360;i++){
-    y=sin((float)i*M_PI/180.0);
+  for(i=0;i<nAngSteps;i++){
+    y=sin((float)i*(360.0/(float)nAngSteps)*M_PI/180.0);
     if(y>0.3)      sinArr[i]=1;
     else if(y<-0.3)sinArr[i]=-1;
     else           sinArr[i]=0;

@@ -70,6 +70,11 @@ void engine::setPhase(float thisTime,float dTime)
     dAng=360.0*rpm1;
     tachAng+=dAng*dTime;
 
+    // to prevent loss of precision when running for long periods
+    while(tachAng>=360000.0){   // 1000 rotations at a time to save
+      tachAng-=360000.0;        // computational time
+    }
+
     rDir=sinArr[(int)tachAng%360];
     bDir=sinArr[(int)(tachAng+120.0)%360];
     gDir=sinArr[(int)(tachAng+240.0)%360];

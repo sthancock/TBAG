@@ -13,7 +13,7 @@
 
 const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 const float tRate=100.0/50.0;      // throttle change rate, in % per second
-const int nAngSteps=120;           // number of angle steps in tachometer array
+const int nAngSteps=360;           // number of angle steps in tachometer array
 char sinArr[nAngSteps];            // pre-calculated array of sine +/-
 
 /*#####################################*/
@@ -74,9 +74,9 @@ void engine::setPhase(float thisTime,float dTime)
       tachAng-=360000.0;        // computational time
     }
 
-    rDir=sinArr[(int)tachAng%nAngSteps];
-    bDir=sinArr[(int)(tachAng+120.0)%nAngSteps];
-    gDir=sinArr[(int)(tachAng+240.0)%nAngSteps];
+    rDir=sinArr[(int)(tachAng*(float)nAngSteps/360.0)%nAngSteps];
+    bDir=sinArr[(int)((tachAng+120.0)*(float)nAngSteps/360.0)%nAngSteps];
+    gDir=sinArr[(int)((tachAng+240.0)*(float)nAngSteps/360.0)%nAngSteps];
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG  // write to display to monitor

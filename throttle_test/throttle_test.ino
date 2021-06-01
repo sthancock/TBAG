@@ -14,7 +14,6 @@
 char sinArr[360];   // pre-calculated array of sine +/-
 const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 const float tRate=100.0/50.0;       // throttle change rate, in % per second
-float tim;         // time now
 
 
 /*#####################################*/
@@ -41,6 +40,7 @@ class engine{
     char rDir;         // red tacho current direction
     char gDir;         // green tacho current direction
     char bDir;         // blue tacho current direction
+    float tim;         // time now
   
     // throttle outputs
     float rpm1;        // tachometer RPM, in %
@@ -206,8 +206,9 @@ void engine::determineState()
   Serial.print(dFuel);
   Serial.print("\n");*/
   #endif
-  // update time
-  tim=thisTime;
+
+  // update system time
+  tim=micros()/1000000.0;
   return;
 }
 
@@ -261,6 +262,7 @@ void engine::writeState()
   //Serial.print(rpm1);
   //Serial.print("\n");
   #endif
+
   
   return;
 }
@@ -322,7 +324,8 @@ void loop() {
   // write outputs
   eng1.writeState();
   eng2.writeState();
-  
+
+
 }/*main loop*/
 
 /*the end*/

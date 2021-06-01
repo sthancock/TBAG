@@ -12,6 +12,9 @@
 /*global variables*/
 
 char sinArr[360];   // pre-calculated array of sine +/-
+const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
+const float tRate=100.0/50.0;       // throttle change rate, in % per second
+float tim;         // time now
 
 
 /*#####################################*/
@@ -28,16 +31,12 @@ class engine{
   private:
     // methods
     void setPhase(float,float);
-    // fixed constants
-    const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 
     // throttle controls
     float throtPos1;  // throttle position, in %
     char cockPos;     // fuel cock position. On/off
   
     // throttle internals
-    const float tRate=100.0/50.0;       // throttle change rate, in % per second
-    float tim;         // time now
     float tachAng;     // phase angle of tachometer
     char rDir;         // red tacho directions
     char gDir;         // green tacho directions
@@ -47,7 +46,7 @@ class engine{
     float rpm1;        // tachometer RPM, in %
     float temp1;       // exhaust temperature
 
-    // pins
+    // arduino pins
     unsigned char RpPin;     // red positive pin
     unsigned char RnPin;     // red negative pin
     unsigned char GpPin;     // green
@@ -80,7 +79,7 @@ void engine::setPhase(float thisTime,float dTime)
     gDir=sinArr[(int)(tachAng+240.0)%360];
   }else rDir=bDir=gDir=0;
 
-  #ifdef DEBUG
+  #ifdef DEBUG  // write to display to monitor
   Serial.print("Pos ");
   Serial.print(throtPos1); 
   Serial.print(" RPM ");
@@ -302,10 +301,9 @@ void setup()
   // pre-calculate
   calcSin();
 
-  // set positions etc.
+  // set positions and pin numbers
   eng1.setup(12,6,11,5,10,4,A5);
   eng2.setup(1,2,3,7,9,13,A6);
-
 }
 
 /*##############################*/

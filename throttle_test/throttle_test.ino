@@ -38,9 +38,9 @@ class engine{
   
     // throttle internals
     float tachAng;     // phase angle of tachometer
-    char rDir;         // red tacho directions
-    char gDir;         // green tacho directions
-    char bDir;         // blue tacho directions
+    char rDir;         // red tacho current direction
+    char gDir;         // green tacho current direction
+    char bDir;         // blue tacho current direction
   
     // throttle outputs
     float rpm1;        // tachometer RPM, in %

@@ -8,8 +8,10 @@
 
 //#define DEBUG
 
+/*#####################################*/
+/*global variables*/
 
-
+char sinArr[360];   // pre-calculated array of sine +/-
 
 
 /*#####################################*/
@@ -56,9 +58,6 @@ class engine{
 };
 
 
-
-
-
 /*##############################*/
 /*determine tachometer phases*/
 
@@ -68,25 +67,12 @@ void engine::setPhase(float thisTime,float dTime)
   float rAng=0,gAng=0,bAng=0;
 
   if(rpm1>0.001){
-    dAng=2.0*M_PI*rpm1;
+    dAng=360.0*rpm1;
     tachAng+=dAng*dTime;
-    while(tachAng>=2.0*M_PI){
-      tachAng=tachAng-2.0*M_PI;
-    }
-    
-    rAng=sin(tachAng);
-    gAng=sin(tachAng+2.0*M_PI/3.0);
-    bAng=sin(tachAng+4.0*M_PI/3.0);
 
-    if(rAng>0.3)      rDir=1;
-    else if(rAng<-0.3)rDir=-1;
-    else              rDir=0;
-    if(gAng>0.3)      gDir=1;
-    else if(gAng<-0.3)gDir=-1;
-    else              gDir=0;
-    if(bAng>0.3)      bDir=1;
-    else if(bAng<-0.3)bDir=-1;
-    else              bDir=0;
+    rDir=sinArr[(int)tachAng%360];
+    bDir=sinArr[(int)(tachAng+120.0)%360];
+    gDir=sinArr[(int)(tachAng+240.0)%360];
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG
@@ -97,13 +83,13 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print(" time ");
   Serial.print(tim,4);
   Serial.print(" ang ");
-  Serial.print(tachAng*180.0/M_PI);
+  Serial.print(tachAng);
   Serial.print(" amp ");
   Serial.print(sin(tachAng),4);
   Serial.print(" ");
-  Serial.print(sin(tachAng+2.0*M_PI/3.0),4);
+  Serial.print(sin(tachAng+120.0),4);
   Serial.print(" ");
-  Serial.print(sin(tachAng+4.0*M_PI/3.0),4);
+  Serial.print(sin(tachAng+240.0),4);
   Serial.print(" ");
   //Serial.print(" phase ");
   Serial.print((int)rDir);
@@ -283,11 +269,33 @@ engine eng2;
 
 
 /*##############################*/
+/*calculate a sine array*/
+
+void calcSin()
+{
+  int i=0;
+  float y=0;
+
+  for(i=0;i<360;i++){
+    y=sin((float)i*M_PI/180.0);
+    if(y>0.3)      sinArr[i]=1;
+    else if(y<-0.3)sinArr[i]=-1;
+    else           sinArr[i]=0;
+  }
+
+  return;  
+}/*calcSin*/
+
+
+/*##############################*/
 /*set things up*/
 
 void setup()
 {
+  void calcSin();
 
+  // pre-calculate
+  calcSin();
 
   // set positions etc.
   eng1.setup(12,6,11,5,10,4,A5);

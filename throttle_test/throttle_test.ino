@@ -278,7 +278,7 @@ void calcSin()
 
   for(i=0;i<nAngSteps;i++){
     y=sin((float)i*(360.0/(float)nAngSteps)*M_PI/180.0);
-    if(y>0.)      sinArr[i]=1;
+    if(y>0.3)      sinArr[i]=1;
     else if(y<-0.3)sinArr[i]=-1;
     else           sinArr[i]=0;
   }

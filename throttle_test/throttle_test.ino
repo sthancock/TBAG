@@ -14,7 +14,8 @@
 const float maxRPM=4000/60.0;      // maximum RPM for tachometers, in Hz
 const float tRate=100.0/50.0;      // throttle change rate, in % per second
 const int nAngSteps=360;           // number of angle steps in tachometer array
-char sinArr[nAngSteps];            // pre-calculated array of sine +/-
+const float angScale=(float)nAngSteps/360.0;
+int8_t sinArr[nAngSteps];            // pre-calculated array of sine +/-
 
 /*#####################################*/
 /*hold data and functions for engines*/
@@ -37,9 +38,9 @@ class engine{
   
     // throttle internals
     float tachAng;     // phase angle of tachometer
-    char rDir;         // red tacho current direction
-    char gDir;         // green tacho current direction
-    char bDir;         // blue tacho current direction
+    int8_t rDir;         // red tacho current direction
+    int8_t gDir;         // green tacho current direction
+    int8_t bDir;         // blue tacho current direction
     float tim;         // time now
   
     // throttle outputs
@@ -70,13 +71,13 @@ void engine::setPhase(float thisTime,float dTime)
     tachAng+=dAng*dTime;
 
     // to prevent loss of precision when running for long periods
-    while(tachAng>=360000.0){   // 1000 rotations at a time to save
+    while(tachAng>360000.0){   // 1000 rotations at a time to save
       tachAng-=360000.0;        // computational time
     }
 
-    rDir=sinArr[(int)(tachAng*(float)nAngSteps/360.0)%nAngSteps];
-    bDir=sinArr[(int)((tachAng+120.0)*(float)nAngSteps/360.0)%nAngSteps];
-    gDir=sinArr[(int)((tachAng+240.0)*(float)nAngSteps/360.0)%nAngSteps];
+    rDir=sinArr[(uint32_t)(tachAng*angScale)%(uint32_t)nAngSteps];
+    bDir=sinArr[(uint32_t)((tachAng+120.0)*angScale)%(uint32_t)nAngSteps];
+    gDir=sinArr[(uint32_t)((tachAng+240.0)*angScale)%(uint32_t)nAngSteps];
   }else rDir=bDir=gDir=0;
 
   #ifdef DEBUG  // write to display to monitor
@@ -88,19 +89,15 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print(tim,4);
   Serial.print(" ang ");
   Serial.print(tachAng);
-  Serial.print(" amp ");
-  Serial.print(sin(tachAng),4);
   Serial.print(" ");
-  Serial.print(sin(tachAng+120.0),4);
+  Serial.print(" phase ");
+  Serial.print(rDir);
   Serial.print(" ");
-  Serial.print(sin(tachAng+240.0),4);
+  Serial.print(gDir);
   Serial.print(" ");
-  //Serial.print(" phase ");
-  Serial.print((int)rDir);
-  Serial.print(" ");
-  Serial.print((int)gDir);
-  Serial.print(" ");
-  Serial.print((int)bDir);
+  Serial.print(bDir);
+  Serial.print(" ang ");
+  Serial.print(angScale);
   Serial.print("\n");
   #endif
 
@@ -151,10 +148,7 @@ void engine::setup(unsigned char inRpPin,unsigned char inRnPin,unsigned char inG
   temp1=0.0;
   rDir=gDir=bDir=0;
 
-  // setup display, if needed
-  #ifdef DEBUG
-  Serial.begin(9600);
-  #endif
+
   
   return;
 }
@@ -300,6 +294,11 @@ void setup()
 {
   void calcSin();
 
+  // setup display, if needed
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
+  
   // pre-calculate
   calcSin();
 

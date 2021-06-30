@@ -6,7 +6,7 @@
 /*#####################*/
 
 
-//#define DEBUG
+#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -38,6 +38,7 @@ class engine{
     // throttle internals
     float tachAng;     // phase angle of tachometer
     int8_t onTachPin;    // which phase pin is on
+    int8_t lastOnTachPin; // which pin was on last
     float tim;         // time now
   
     // throttle outputs
@@ -65,7 +66,9 @@ void engine::setPhase(float thisTime,float dTime)
   uint32_t angFrac=0;
 
   if(rpm1>0.001){
-    dAng=360.0*rpm1;
+    dAng=360.0*(maxRPM/60.0)*rpm1/100.0;
+
+    dAng=360.0;
     tachAng+=dAng*dTime;
 
     // to prevent loss of precision when running for long periods
@@ -87,20 +90,20 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print("Pos ");
   Serial.print(throtPos1); 
   Serial.print(" RPM ");
-  Serial.print(rpm1*60.0,4);
+  Serial.print(rpm1*100.0*maxRPM,4);
   Serial.print(" time ");
   Serial.print(tim,4);
   Serial.print(" ang ");
   Serial.print(tachAng);
-  Serial.print(" ");
-  Serial.print(" phase ");
-  Serial.print(rDir);
-  Serial.print(" ");
-  Serial.print(gDir);
-  Serial.print(" ");
-  Serial.print(bDir);
-  Serial.print(" ang ");
-  Serial.print(angScale);
+  Serial.print(" angFrac ");
+  Serial.print(angFrac);
+  Serial.print(" onPin ");
+  Serial.print(onTachPin);
+  Serial.print(" tim ");
+  Serial.print(tim);
+  Serial.print(" dtim ");
+  Serial.print(dTime,10);
+
   Serial.print("\n");
   #endif
 
@@ -150,7 +153,7 @@ void engine::setup(unsigned char inRpPin,unsigned char inRnPin,unsigned char inG
   rpm1=0.0;     // everything off
   temp1=0.0;
   onTachPin=0;
-
+  lastOnTachPin=0;
 
   
   return;
@@ -179,6 +182,7 @@ void engine::determineState()
   // time change since last call?
   thisTime=micros()/1000000.0;
   dTime=thisTime-tim;
+  
 
   // determine delta fuel
   if(cockPos)dFuel=throtPos1-rpm1;
@@ -221,36 +225,38 @@ void engine::writeState()
   // update this so a digitalWrite is only done for a direction change
 
   //eventually this should be replaced with arrays
-  if(onTachPin==1){
-    digitalWrite(RnPin,LOW);
-    digitalWrite(GpPin,LOW);
-    digitalWrite(BpPin,LOW);
-    digitalWrite(BnPin,HIGH);
-    digitalWrite(GnPin,HIGH);
-    digitalWrite(RpPin,HIGH);
-  }else if(onTachPin==2){
-    digitalWrite(GnPin,LOW);
-    digitalWrite(RpPin,LOW);
-    digitalWrite(BpPin,LOW);
-    digitalWrite(RnPin,HIGH);
-    digitalWrite(BnPin,HIGH);
-    digitalWrite(GpPin,HIGH);
- }else if(onTachPin==3){
-    digitalWrite(BnPin,LOW);
-    digitalWrite(RpPin,LOW);
-    digitalWrite(GpPin,LOW);
-    digitalWrite(RnPin,HIGH);
-    digitalWrite(GnPin,HIGH);
-    digitalWrite(BpPin,HIGH);
-  }else{
-    digitalWrite(RpPin,LOW);
-    digitalWrite(RnPin,LOW);
-    digitalWrite(GpPin,LOW);
-    digitalWrite(BnPin,LOW);
-    digitalWrite(BpPin,LOW);
-    digitalWrite(GnPin,LOW);
+  if(onTachPin!=lastOnTachPin){
+    if(onTachPin==1){
+      digitalWrite(RnPin,LOW);
+      digitalWrite(GpPin,LOW);
+      digitalWrite(BpPin,LOW);
+      digitalWrite(BnPin,HIGH);
+      digitalWrite(GnPin,HIGH);
+      digitalWrite(RpPin,HIGH);
+    }else if(onTachPin==2){
+      digitalWrite(GnPin,LOW);
+      digitalWrite(RpPin,LOW);
+      digitalWrite(BpPin,LOW); 
+      digitalWrite(RnPin,HIGH);
+      digitalWrite(BnPin,HIGH);
+      digitalWrite(GpPin,HIGH);
+   }else if(onTachPin==3){
+      digitalWrite(BnPin,LOW);
+      digitalWrite(RpPin,LOW);
+      digitalWrite(GpPin,LOW);
+      digitalWrite(RnPin,HIGH);
+      digitalWrite(GnPin,HIGH);
+      digitalWrite(BpPin,HIGH);
+    }else{
+      digitalWrite(RpPin,LOW);
+      digitalWrite(RnPin,LOW);
+      digitalWrite(GpPin,LOW);
+      digitalWrite(BnPin,LOW);
+      digitalWrite(BpPin,LOW);
+      digitalWrite(GnPin,LOW);  
+    }
   }
-  
+  lastOnTachPin=onTachPin;
 
   #ifdef DEBUG
   //Serial.print("ThrotPos: ");
@@ -282,8 +288,9 @@ void setup()
   #endif
 
   // set positions and pin numbers
+  // pins are inRpPin, inRnPin, inGpPin, inGnPin, inBpPin, inBnPin, inthrot1Pin
   eng1.setup(12,6,11,5,10,4,A5);
-  eng2.setup(1,2,3,7,9,13,A6);
+  //eng2.setup(1,2,3,7,9,13,A6);
 }
 
 /*##############################*/
@@ -293,16 +300,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  eng2.readInputs();
+  //eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  eng2.determineState();
+  //eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  eng2.writeState();
-
+  //eng2.writeState();
 
 }/*main loop*/
 

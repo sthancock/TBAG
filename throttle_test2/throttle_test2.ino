@@ -63,7 +63,7 @@ void engine::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
   float rAng=0,gAng=0,bAng=0;
-  uint32_t angFrac=0;
+  uint32_t angFrac=0,offset=30;
 
   if(rpm1>0.001){
     dAng=360.0*(maxRPM/60.0)*rpm1/100.0;
@@ -81,12 +81,11 @@ void engine::setPhase(float thisTime,float dTime)
 
     angFrac=(uint32_t)tachAng%360;
 
-    if(angFrac<120)onTachPin=1;
-    else if(angFrac<240)onTachPin=2;
-    else                onTachPin=3;
+    if((angFrac>(0+offset))&&(angFrac<(120-offset)))       onTachPin=1;
+    else if((angFrac>(120+offset))&&(angFrac<(240-offset)))onTachPin=2;
+    else if((angFrac>(240+offset))&&(angFrac<(360-offset)))onTachPin=3;
+    else                                                   onTachPin=0;
   }else onTachPin=0;
-
-  onTachPin=2;
 
   #ifdef DEBUG  // write to display to monitor
   Serial.print("Pos ");

@@ -6,7 +6,7 @@
 /*#####################*/
 
 
-//#define DEBUG
+#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -61,44 +61,10 @@ class engine{
 
 void engine::setPhase(float thisTime,float dTime)
 {
-  float dAng=0;  // angle change rate
-  float rAng=0,gAng=0,bAng=0;
-  uint32_t angFrac=0;
 
-  if(rpm1>0.001){
-    dAng=360.0*(maxRPM/60.0)*rpm1/100.0;
-
-    dAng=360.0;
-    tachAng+=dAng*dTime;
-
-    // to prevent loss of precision when running for long periods
-    while(tachAng>360000.0){   // 1000 rotations at a time to save
-      tachAng-=360000.0;        // computational time
-    }
-    while(tachAng<0.0){   // keep positive
-      tachAng+=360.0;
-    }
-
-    angFrac=(uint32_t)tachAng%360;
-
-    if(angFrac<120)onTachPin=1;
-    else if(angFrac<240)onTachPin=2;
-    else                onTachPin=3;
-  }else onTachPin=0;
-
-  onTachPin=2;
+  onTachPin=1;
 
   #ifdef DEBUG  // write to display to monitor
-  Serial.print("Pos ");
-  Serial.print(throtPos1); 
-  Serial.print(" RPM ");
-  Serial.print(rpm1*100.0*maxRPM,4);
-  Serial.print(" time ");
-  Serial.print(tim,4);
-  Serial.print(" ang ");
-  Serial.print(tachAng);
-  Serial.print(" angFrac ");
-  Serial.print(angFrac);
   Serial.print(" onPin ");
   Serial.print(onTachPin);
   Serial.print(" tim ");
@@ -173,49 +139,6 @@ void engine::readInputs()
 }
 
 /*##############################*/
-/*adjust the states*/
-
-void engine::determineState()
-{
-  float dFuel=0;
-  float thisTime=0,dTime=0;
-  
-
-  // time change since last call?
-  thisTime=micros()/1000000.0;
-  dTime=thisTime-tim;
-  tim=thisTime;
-  
-
-  // determine delta fuel
-  if(cockPos)dFuel=throtPos1-rpm1;
-  else       dFuel=-1.0*rpm1;
-
-  // update rpm and temperatures
-  rpm1+=dFuel*tRate*dTime;
-  if(rpm1>50.0)temp1=50.0;
-  else         temp1=0.0;
-
-  //set tachometer phase
-  setPhase(thisTime,dTime);
-
-  #ifdef DEBUG
-  /*Serial.print("ThrotPos: ");
-  Serial.print(throtPos1);
-  Serial.print(" RPM: ");
-  Serial.print(rpm1);
-  Serial.print(" dtime ");
-  Serial.print(dTime);
-  Serial.print(" dFuel ");
-  Serial.print(dFuel);
-  Serial.print("\n");*/
-  #endif
-
-  return;
-}
-
-
-/*##############################*/
 /*write state*/
 
 void engine::writeState()
@@ -258,15 +181,6 @@ void engine::writeState()
     }
   }
   lastOnTachPin=onTachPin;
-
-  #ifdef DEBUG
-  //Serial.print("ThrotPos: ");
-  //Serial.print(throtPos1);
-  //Serial.print(" RPM: ");
-  //Serial.print(rpm1);
-  //Serial.print("\n");
-  #endif
-
   
   return;
 }
@@ -275,7 +189,6 @@ void engine::writeState()
 /*##############################*/
 /*global classes to hold data*/
 engine eng1;
-engine eng2;
 
 
 /*##############################*/
@@ -291,7 +204,6 @@ void setup()
   // set positions and pin numbers
   // pins are inRpPin, inRnPin, inGpPin, inGnPin, inBpPin, inBnPin, inthrot1Pin
   eng1.setup(12,6,11,5,10,4,A5);
-  //eng2.setup(1,2,3,7,9,13,A6);
 }
 
 /*##############################*/
@@ -301,15 +213,11 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  //eng2.readInputs();
 
-  // determine state
-  eng1.determineState();
-  //eng2.determineState();
+  eng1.setPhase();
 
   // write outputs
   eng1.writeState();
-  //eng2.writeState();
 
 }/*main loop*/
 

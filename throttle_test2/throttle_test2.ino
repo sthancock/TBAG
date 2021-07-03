@@ -66,9 +66,8 @@ void engine::setPhase(float thisTime,float dTime)
   uint32_t angFrac=0,offset=30;
 
   if(rpm1>0.001){
-    dAng=360.0*(maxRPM/60.0)*rpm1/100.0;
+    dAng=360.0*maxRPM*rpm1/100.0;
 
-    dAng=360.0;
     tachAng+=dAng*dTime;
 
     // to prevent loss of precision when running for long periods

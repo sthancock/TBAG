@@ -37,9 +37,13 @@ class engine{
   
     // throttle internals
     float tachAng;     // phase angle of tachometer
-    int8_t onTachPin;    // which phase pin is on
-    int8_t lastOnTachPin; // which pin was on last
-    float tim;         // time now
+    int8_t rMode;     // Red phase +ve or -ve
+    int8_t gMode;     // Green phase +ve or -ve
+    int8_t bMode;     // Blue phase +ve or -ve
+    int8_t lastRmode; // Last red phase mode
+    int8_t lastGmode; // Last red phase mode
+    int8_t lastBmode; // Last red phase mode
+    float tim;        // time now
   
     // throttle outputs
     float rpm1;        // tachometer RPM, in %
@@ -63,7 +67,7 @@ void engine::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
   float rAng=0,gAng=0,bAng=0;
-  uint32_t angFrac=0,offset=30;
+  uint32_t angFrac=0,offset=10;
 
   if(rpm1>0.001){
     dAng=360.0*maxRPM*rpm1/100.0;
@@ -80,25 +84,32 @@ void engine::setPhase(float thisTime,float dTime)
 
     angFrac=(uint32_t)tachAng%360;
 
-    if((angFrac>(0+offset))&&(angFrac<(120-offset)))       onTachPin=1;
-    else if((angFrac>(120+offset))&&(angFrac<(240-offset)))onTachPin=2;
-    else if((angFrac>(240+offset))&&(angFrac<(360-offset)))onTachPin=3;
-    else                                                   onTachPin=0;
-  }else onTachPin=0;
+    // Decide which pins are ground and which are live
+    if((angFrac>(0+offset))&&(angFrac<(180-offset)))rMode=1;
+    else                                            rMode=0;
+    if((angFrac>(120+offset))&&(angFrac<(300-offset)))gMode=1;
+    else                                              gMode=0;
+    if((angFrac>(240+offset))||(angFrac<(60-offset)))bMode=1;
+    else                                             bMode=0;
+  }else rMode=gMode=bMode=0;
 
   #ifdef DEBUG  // write to display to monitor
   Serial.print("Pos ");
   Serial.print(throtPos1); 
   Serial.print(" RPM ");
-  Serial.print(rpm1*100.0*maxRPM,4);
+  Serial.print(rpm1*maxRPM,4);
   Serial.print(" time ");
   Serial.print(tim,4);
   Serial.print(" ang ");
   Serial.print(tachAng);
   Serial.print(" angFrac ");
   Serial.print(angFrac);
-  Serial.print(" onPin ");
-  Serial.print(onTachPin);
+  Serial.print(" rMode ");
+  Serial.print(rMode);
+  Serial.print(" gMode ");
+  Serial.print(gMode);
+  Serial.print(" bMode ");
+  Serial.print(bMode);
   Serial.print(" tim ");
   Serial.print(tim);
   Serial.print(" dtim ");
@@ -108,7 +119,8 @@ void engine::setPhase(float thisTime,float dTime)
   #endif
 
   return;
-}
+}//engine::setPhase
+
 
 /*##############################*/
 /*internal setup*/
@@ -152,12 +164,11 @@ void engine::setup(unsigned char inRpPin,unsigned char inRnPin,unsigned char inG
   // outputs
   rpm1=0.0;     // everything off
   temp1=0.0;
-  onTachPin=0;
-  lastOnTachPin=0;
+  rMode=gMode=bMode=0;
+  lastRmode=lastGmode=lastBmode=0;
 
-  
   return;
-}
+}//engine::setup
 
 /*##############################*/
 /*read input controls*/
@@ -224,38 +235,36 @@ void engine::writeState()
   // update this so a digitalWrite is only done for a direction change
 
   //eventually this should be replaced with arrays
-  if(onTachPin!=lastOnTachPin){
-    if(onTachPin==1){
+  if(rMode!=lastRmode){
+    if(rMode==1){
       digitalWrite(RnPin,LOW);
-      digitalWrite(GpPin,LOW);
-      digitalWrite(BpPin,LOW);
-      digitalWrite(BnPin,HIGH);
-      digitalWrite(GnPin,HIGH);
       digitalWrite(RpPin,HIGH);
-    }else if(onTachPin==2){
-      digitalWrite(GnPin,LOW);
-      digitalWrite(RpPin,LOW);
-      digitalWrite(BpPin,LOW); 
-      digitalWrite(RnPin,HIGH);
-      digitalWrite(BnPin,HIGH);
-      digitalWrite(GpPin,HIGH);
-   }else if(onTachPin==3){
-      digitalWrite(BnPin,LOW);
-      digitalWrite(RpPin,LOW);
-      digitalWrite(GpPin,LOW);
-      digitalWrite(RnPin,HIGH);
-      digitalWrite(GnPin,HIGH);
-      digitalWrite(BpPin,HIGH);
     }else{
       digitalWrite(RpPin,LOW);
-      digitalWrite(RnPin,LOW);
-      digitalWrite(GpPin,LOW);
-      digitalWrite(BnPin,LOW);
-      digitalWrite(BpPin,LOW);
-      digitalWrite(GnPin,LOW);  
+      digitalWrite(RnPin,HIGH);
     }
-  }
-  lastOnTachPin=onTachPin;
+    lastRmode=rMode;
+  }  
+  if(gMode!=lastGmode){
+    if(gMode==1){
+      digitalWrite(GnPin,LOW);
+      digitalWrite(GpPin,HIGH);
+    }else{
+      digitalWrite(GpPin,LOW);
+      digitalWrite(GnPin,HIGH);
+    }
+    lastGmode=gMode;
+  }  
+  if(bMode!=lastBmode){
+    if(bMode==1){
+      digitalWrite(BnPin,LOW);
+      digitalWrite(BpPin,HIGH);
+    }else{
+      digitalWrite(BpPin,LOW);
+      digitalWrite(BnPin,HIGH);
+    }
+    lastRmode=rMode;
+  }  
 
   #ifdef DEBUG
   //Serial.print("ThrotPos: ");
@@ -265,7 +274,6 @@ void engine::writeState()
   //Serial.print("\n");
   #endif
 
-  
   return;
 }
 

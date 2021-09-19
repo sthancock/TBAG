@@ -263,7 +263,7 @@ void engine::writeState()
       digitalWrite(BpPin,LOW);
       digitalWrite(BnPin,HIGH);
     }
-    lastRmode=rMode;
+    lastBmode=bMode;
   }  
 
   #ifdef DEBUG

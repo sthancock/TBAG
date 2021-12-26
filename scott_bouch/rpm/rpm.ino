@@ -4,7 +4,7 @@ https://forum.arduino.cc/t/3-phase-hysteresis-motor-control-why-so-slow-jet-engi
 */
 
 
-#define DEBUG
+//#define DEBUG
 
 int outA = 4;                      // Declare output pin A
 int outB = 5;                      // Declare output pin B

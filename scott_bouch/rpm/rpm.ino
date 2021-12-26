@@ -4,9 +4,11 @@ https://forum.arduino.cc/t/3-phase-hysteresis-motor-control-why-so-slow-jet-engi
 */
 
 
-int outA = 5;                      // Declare output pin A
-int outB = 6;                      // Declare output pin B
-int outC = 7;                      // Declare output pin C
+#define DEBUG
+
+int outA = 4;                      // Declare output pin A
+int outB = 5;                      // Declare output pin B
+int outC = 6;                      // Declare output pin C
 int arrayLookupA = 1;               // Output A array lookup point
 int arrayLookupB = 3;               // Output B array lookup point
 int arrayLookupC = 5;               // Output C array lookup point
@@ -15,35 +17,44 @@ int statusArray[6] = {1,1,1,0,0,0}; // Sequence used for output switching
 
 
 void setup() {
-Serial.begin(9600);
-pinMode(outA, OUTPUT);
-pinMode(outB, OUTPUT);
-pinMode(outC, OUTPUT);
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
+  
+  pinMode(outA, OUTPUT);
+  pinMode(outB, OUTPUT);
+  pinMode(outC, OUTPUT);
 }
 
 void loop() {
 
-  Serial.print(" microseconds ");
 
-++arrayIndex;
-if (arrayIndex == 6)
-{arrayIndex = 0;}
+  ++arrayIndex;
+  if (arrayIndex == 6){
+    arrayIndex = 0;
+  }
 
-arrayLookupA = arrayIndex;
+  arrayLookupA = arrayIndex;
 
-if (arrayIndex + 2 < 6)
-{arrayLookupB = arrayIndex + 2;}
-else
-{arrayLookupB = arrayIndex - 4;}
+  if (arrayIndex + 2 < 6)arrayLookupB = arrayIndex + 2;
+  else                   arrayLookupB = arrayIndex - 4;
 
-if (arrayIndex + 4 < 6)
-{arrayLookupC = arrayIndex + 4;}
-else
-{arrayLookupC = arrayIndex - 2;}
+  if (arrayIndex + 4 < 6)arrayLookupC = arrayIndex + 4;
+  else                   arrayLookupC = arrayIndex - 2;
 
-digitalWrite(outA, statusArray[arrayLookupA]);
-digitalWrite(outB, statusArray[arrayLookupB]);
-digitalWrite(outC, statusArray[arrayLookupC]);
+   digitalWrite(outA, statusArray[arrayLookupA]);
+   digitalWrite(outB, statusArray[arrayLookupB]);
+   digitalWrite(outC, statusArray[arrayLookupC]);
 
+  #ifdef DEBUG
+   Serial.print("Microseconds ");
+   Serial.print(arrayIndex);
+   Serial.print(" ");
+   Serial.print(statusArray[arrayLookupA]);
+   Serial.print(" ");
+   Serial.print(statusArray[arrayLookupB]);
+   Serial.print(" ");
+   Serial.print(statusArray[arrayLookupC]);
+   Serial.print("\n");
+   #endif
 }
-

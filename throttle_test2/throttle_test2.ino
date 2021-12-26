@@ -22,7 +22,7 @@ const float angScale=(float)nAngSteps/360.0;
 class engine{
   public:
     // methods
-    void setup(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char);
+    void setup(unsigned char,unsigned char,unsigned char,unsigned char);
     void readInputs();
     void determineState();
     void writeState();
@@ -50,12 +50,9 @@ class engine{
     float temp1;       // exhaust temperature
 
     // arduino pins
-    unsigned char RpPin;     // red positive pin
-    unsigned char RnPin;     // red negative pin
-    unsigned char GpPin;     // green
-    unsigned char GnPin;     // green
-    unsigned char BpPin;     // blue
-    unsigned char BnPin;     // blue
+    unsigned char rPin;     // red positive pin
+    unsigned char gPin;     // green
+    unsigned char bPin;     // blue
     unsigned char throt1Pin; // input for throttle
 };
 
@@ -67,12 +64,13 @@ void engine::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
   float rAng=0,gAng=0,bAng=0;
-  uint32_t angFrac=0,offset=10;
+  uint32_t angFrac=0,offset=0;
 
   if(rpm1>0.001){
     dAng=360.0*maxRPM*rpm1/100.0;
 
     tachAng+=dAng*dTime;
+    //tachAng=(float)((int)tachAng%360);
 
     // to prevent loss of precision when running for long periods
     while(tachAng>360000.0){   // 1000 rotations at a time to save
@@ -89,8 +87,8 @@ void engine::setPhase(float thisTime,float dTime)
     else                                            rMode=0;
     if((angFrac>(120+offset))&&(angFrac<(300-offset)))gMode=1;
     else                                              gMode=0;
-    if((angFrac>(240+offset))||(angFrac<(60-offset)))bMode=1;
-    else                                             bMode=0;
+    if(((angFrac>(240+offset))||(angFrac<(60-offset))))bMode=1;
+    else                                               bMode=0;
   }else rMode=gMode=bMode=0;
 
   #ifdef DEBUG  // write to display to monitor
@@ -125,34 +123,25 @@ void engine::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void engine::setup(unsigned char inRpPin,unsigned char inRnPin,unsigned char inGpPin,\
-                   unsigned char inGnPin,unsigned char inBpPin,unsigned char inBnPin,unsigned char inthrot1Pin)
+void engine::setup(unsigned char inRPin,unsigned char inGPin,\
+                   unsigned char inBPin,unsigned char inthrot1Pin)
 {
   // set bin variables
-  RpPin=inRpPin;
-  RnPin=inRnPin;
-  GpPin=inGpPin;
-  GnPin=inGnPin;
-  BpPin=inBpPin;
-  BnPin=inBnPin;
+  rPin=inRPin;
+  gPin=inGPin;
+  bPin=inBPin;
   throt1Pin=inthrot1Pin;
 
   // set pin modes
-  pinMode(RpPin, OUTPUT);
-  pinMode(RnPin, OUTPUT);
-  pinMode(GpPin, OUTPUT);
-  pinMode(GnPin, OUTPUT);
-  pinMode(BpPin, OUTPUT);
-  pinMode(BnPin, OUTPUT);
+  pinMode(rPin, OUTPUT);
+  pinMode(gPin, OUTPUT);
+  pinMode(bPin, OUTPUT);
   pinMode(throt1Pin, INPUT);
 
   // set all pins LOW
-  digitalWrite(RpPin,LOW);
-  digitalWrite(RnPin,LOW);
-  digitalWrite(GpPin,LOW);
-  digitalWrite(GnPin,LOW);
-  digitalWrite(BpPin,LOW);
-  digitalWrite(BnPin,LOW);
+  digitalWrite(rPin,LOW);
+  digitalWrite(gPin,LOW);
+  digitalWrite(bPin,LOW);
   
   // inputs
   throtPos1=0.0; // starts with throttle closed
@@ -236,33 +225,18 @@ void engine::writeState()
 
   //eventually this should be replaced with arrays
   if(rMode!=lastRmode){
-    if(rMode==1){
-      digitalWrite(RnPin,LOW);
-      digitalWrite(RpPin,HIGH);
-    }else{
-      digitalWrite(RpPin,LOW);
-      digitalWrite(RnPin,HIGH);
-    }
+    if(rMode==1)digitalWrite(rPin,HIGH);
+    else        digitalWrite(rPin,LOW);
     lastRmode=rMode;
   }  
   if(gMode!=lastGmode){
-    if(gMode==1){
-      digitalWrite(GnPin,LOW);
-      digitalWrite(GpPin,HIGH);
-    }else{
-      digitalWrite(GpPin,LOW);
-      digitalWrite(GnPin,HIGH);
-    }
+    if(gMode==1)digitalWrite(gPin,HIGH);
+    else        digitalWrite(gPin,LOW);
     lastGmode=gMode;
   }  
   if(bMode!=lastBmode){
-    if(bMode==1){
-      digitalWrite(BnPin,LOW);
-      digitalWrite(BpPin,HIGH);
-    }else{
-      digitalWrite(BpPin,LOW);
-      digitalWrite(BnPin,HIGH);
-    }
+    if(bMode==1)digitalWrite(bPin,HIGH);
+    else        digitalWrite(bPin,LOW);
     lastBmode=bMode;
   }  
 
@@ -295,8 +269,8 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are inRpPin, inRnPin, inGpPin, inGnPin, inBpPin, inBnPin, inthrot1Pin
-  eng1.setup(12,6,11,5,10,4,A5);
+  // pins are inRPin, inGPin, inBPin, inthrot1Pin
+  eng1.setup(4,5,6,A5);
   //eng2.setup(1,2,3,7,9,13,A6);
 }
 
@@ -321,4 +295,3 @@ void loop() {
 
 /*the end*/
 /*##############################*/
-

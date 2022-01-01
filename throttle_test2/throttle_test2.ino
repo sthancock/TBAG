@@ -22,7 +22,7 @@ const float angScale=(float)nAngSteps/360.0;
 class engine{
   public:
     // methods
-    void setup(unsigned char,unsigned char,unsigned char,unsigned char);
+    void setup(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char);
     void readInputs();
     void determineState();
     void writeState();
@@ -50,10 +50,11 @@ class engine{
     float temp1;       // exhaust temperature
 
     // arduino pins
-    unsigned char rPin;     // red positive pin
-    unsigned char gPin;     // green
-    unsigned char bPin;     // blue
+    unsigned char rPin;     // RPM gauge red phase output
+    unsigned char gPin;     // RPM gauge green phase output
+    unsigned char bPin;     // RPM gauge blue phase output
     unsigned char throt1Pin; // input for throttle
+    unsigned char jptPin;    // JPT gauge output
 };
 
 
@@ -124,19 +125,22 @@ void engine::setPhase(float thisTime,float dTime)
 /*internal setup*/
 
 void engine::setup(unsigned char inRPin,unsigned char inGPin,\
-                   unsigned char inBPin,unsigned char inthrot1Pin)
+                   unsigned char inBPin,unsigned char inthrot1Pin,\
+                   unsigned char inJPTpin)
 {
   // set bin variables
   rPin=inRPin;
   gPin=inGPin;
   bPin=inBPin;
   throt1Pin=inthrot1Pin;
+  jptPin=inJPTpin;
 
   // set pin modes
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
   pinMode(throt1Pin, INPUT);
+  pinMode(inJPTpin, OUTPUT);
 
   // set all pins LOW
   digitalWrite(rPin,LOW);
@@ -270,7 +274,7 @@ void setup()
 
   // set positions and pin numbers
   // pins are inRPin, inGPin, inBPin, inthrot1Pin
-  eng1.setup(4,5,6,A5);
+  eng1.setup(4,5,6,A5,3);
   //eng2.setup(1,2,3,7,9,13,A6);
 }
 

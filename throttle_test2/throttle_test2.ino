@@ -198,8 +198,9 @@ void engine::determineState()
 
   // update rpm and temperatures
   rpm1+=dFuel*tRate*dTime;
-  if(rpm1>50.0)temp1=50.0;
-  else         temp1=0.0;
+  temp1=255.0*rpm1/maxRPM;
+  //if(rpm1>50.0)temp1=50.0;
+  //else         temp1=0.0;
 
   //set tachometer phase
   setPhase(thisTime,dTime);
@@ -225,12 +226,7 @@ void engine::determineState()
 
 void engine::writeState()
 {
-  // determine phase for RPM
-  
-  // is this a change?
-  // update this so a digitalWrite is only done for a direction change
-
-  //eventually this should be replaced with arrays
+  // RPM gauge, write 3 phases
   if(rMode!=lastRmode){
     if(rMode==1)digitalWrite(rPin,HIGH);
     else        digitalWrite(rPin,LOW);
@@ -245,7 +241,10 @@ void engine::writeState()
     if(bMode==1)digitalWrite(bPin,HIGH);
     else        digitalWrite(bPin,LOW);
     lastBmode=bMode;
-  }  
+  }
+
+  // JPT gauge, write voltage
+  analogWrite(jptPin,(int)temp1);
 
   #ifdef DEBUG
   //Serial.print("ThrotPos: ");

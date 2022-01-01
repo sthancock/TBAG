@@ -141,12 +141,13 @@ void engine::setup(unsigned char inRPin,unsigned char inGPin,\
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
   pinMode(throt1Pin, INPUT);
-  pinMode(inJPTpin, OUTPUT);
+  pinMode(jptPin, OUTPUT);
 
   // set all pins LOW
   digitalWrite(rPin,LOW);
   digitalWrite(gPin,LOW);
   digitalWrite(bPin,LOW);
+  analogWrite(jptPin,0);
   
   // inputs
   throtPos1=0.0; // starts with throttle closed

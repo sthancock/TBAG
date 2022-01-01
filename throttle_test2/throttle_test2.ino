@@ -34,6 +34,7 @@ class engine{
     // throttle controls
     float throtPos1;  // throttle position, in %
     char cockPos;     // fuel cock position. On/off
+    char airStart;    // air start position. On/off
   
     // throttle internals
     float tachAng;     // phase angle of tachometer
@@ -150,6 +151,7 @@ void engine::setup(unsigned char inRPin,unsigned char inGPin,\
   // inputs
   throtPos1=0.0; // starts with throttle closed
   cockPos=1;     // hard-coded open for now, as now switch
+  airStart=1;    // hard-coded open for now
 
   // internals
   tachAng=0.0;

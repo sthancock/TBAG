@@ -12,7 +12,7 @@
 /*global variables*/
 
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
-const float tRate=50.0/50.0;      // throttle change rate, in % per second
+const float tRate=34.0/50.0;      // throttle change rate, in % per second
 const int nAngSteps=360;           // number of angle steps in tachometer array
 const float angScale=(float)nAngSteps/360.0;
 

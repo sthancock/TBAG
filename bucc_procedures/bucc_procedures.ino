@@ -85,12 +85,12 @@ void engine::setPhase(float thisTime,float dTime)
     angFrac=(uint32_t)tachAng%360;
 
     // Decide which pins are ground and which are live
-    if((angFrac>(0+offset))&&(angFrac<(180-offset)))rMode=1;
-    else                                            rMode=0;
+    if((angFrac>(0+offset))&&(angFrac<(180-offset)))bMode=1;
+    else                                            bMode=0;
     if((angFrac>(120+offset))&&(angFrac<(300-offset)))gMode=1;
     else                                              gMode=0;
-    if(((angFrac>(240+offset))||(angFrac<(60-offset))))bMode=1;
-    else                                               bMode=0;
+    if(((angFrac>(240+offset))||(angFrac<(60-offset))))rMode=1;
+    else                                               rMode=0;
   }else rMode=gMode=bMode=0;
 
   #ifdef DEBUG  // write to display to monitor

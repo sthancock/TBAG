@@ -63,7 +63,7 @@ class engine{
     int8_t cockPin;  // fuel cock pin        
     int8_t startPin; // engine start switch pin
     int8_t airPin;   // air start pin
-};
+}; /*engine class*/
 
 
 /*##############################*/
@@ -125,7 +125,7 @@ void engine::setPhase(float thisTime,float dTime)
   #endif
 
   return;
-}//engine::setPhase
+}/*engine::setPhase*/
 
 
 /*##############################*/
@@ -179,7 +179,8 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   lastRmode=lastGmode=lastBmode=0;
 
   return;
-}//engine::setup
+}/*engine::setup*/
+
 
 /*##############################*/
 /*read input controls*/
@@ -190,7 +191,8 @@ void engine::readInputs()
   throtPos=(float)map(analogRead(throtPin), 0, 1024, 0, maxRPM);
 
   return;
-}
+}/*engine::readInputs*/
+
 
 /*##############################*/
 /*adjust the states*/
@@ -221,7 +223,7 @@ void engine::determineState()
   setPhase(thisTime,dTime);
 
   return;
-}
+}/*engine::determineState*/
 
 
 /*##############################*/
@@ -250,11 +252,12 @@ void engine::writeState()
   analogWrite(jptPin,(int)temp1);
 
   return;
-}
+}/*engine::writeState*/
 
 
 /*##############################*/
 /*global classes to hold data*/
+
 engine eng1;
 engine eng2;
 

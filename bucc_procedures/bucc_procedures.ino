@@ -1,9 +1,9 @@
-/*#####################*/
-/*# Program to drive  #*/
-/*# throttle response #*/
-/*# for bucc cockpit  #*/
-/*# TBAG 2021         #*/
-/*#####################*/
+/*########################*/
+/*# Program to drive     #*/
+/*# buccaneer procedures #*/
+/*# trainer              #*/
+/*# TBAG 2021            #*/
+/*########################*/
 
 
 //#define DEBUG
@@ -12,7 +12,8 @@
 /*global variables*/
 
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
-const float tRate=34.0/50.0;      // throttle change rate, in % per second
+const float throtGate=0.1*maxRPM;  // min throttle gate position
+const float tRate=34.0/50.0;       // throttle change rate, in % per second
 const int nAngSteps=360;           // number of angle steps in tachometer array
 const float angScale=(float)nAngSteps/360.0;
 

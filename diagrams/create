@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+latex circuit_diagram
+bibtex circuit_diagram
+latex circuit_diagram
+latex circuit_diagram
+dvips -o circuit_diagram.ps circuit_diagram.dvi
+ps2pdf circuit_diagram.ps circuit_diagram.pdf
+#/home/tquaife/bin/linux/latex2rtf experiments.tex
+#xdvi echi_abisko.dvi
+

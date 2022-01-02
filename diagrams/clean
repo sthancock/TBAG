@@ -1,0 +1,13 @@
+#!/bin/csh -f
+
+set root="circuit_diagram"
+set endings="aux dvi log pdf ps"
+
+foreach end($endings)
+  set file="$root.$end"
+  if(-e $file)then
+    echo "$file"
+    rm $file
+  endif
+end
+

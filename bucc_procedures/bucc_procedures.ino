@@ -23,7 +23,7 @@ const float angScale=(float)nAngSteps/360.0;
 class engine{
   public:
     // methods
-    void setup(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char);
+    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
     void readInputs();
     void determineState();
     void writeState();
@@ -33,7 +33,7 @@ class engine{
     void setPhase(float,float);
 
     // throttle controls
-    float throtPos1;  // throttle position, in %
+    float throtPos;   // throttle position, in %
     bool engMaster;   // engine master switch
     bool cockPos;     // fuel cock position. On/off
     bool engStart;    // engine start switch
@@ -54,11 +54,15 @@ class engine{
     float temp1;       // exhaust temperature
 
     // arduino pins
-    unsigned char rPin;     // RPM gauge red phase output
-    unsigned char gPin;     // RPM gauge green phase output
-    unsigned char bPin;     // RPM gauge blue phase output
-    unsigned char throt1Pin; // input for throttle
-    unsigned char jptPin;    // JPT gauge output
+    int8_t rPin;     // RPM gauge red phase output
+    int8_t gPin;     // RPM gauge green phase output
+    int8_t bPin;     // RPM gauge blue phase output
+    int8_t throtPin; // input for throttle
+    int8_t jptPin;   // JPT gauge output
+    int8_t engMasPin;// engine master switch pin
+    int8_t cockPin;  // fuel cock pin        
+    int8_t startPin; // engine start switch pin
+    int8_t airPin;   // air start pin
 };
 
 
@@ -97,7 +101,7 @@ void engine::setPhase(float thisTime,float dTime)
 
   #ifdef DEBUG  // write to display to monitor
   Serial.print("Pos ");
-  Serial.print(throtPos1); 
+  Serial.print(throtPos); 
   Serial.print(" RPM ");
   Serial.print(rpm1*maxRPM,4);
   Serial.print(" time ");
@@ -127,23 +131,30 @@ void engine::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void engine::setup(unsigned char inRPin,unsigned char inGPin,\
-                   unsigned char inBPin,unsigned char inthrot1Pin,\
-                   unsigned char inJPTpin)
+void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
+                   int8_t inJPTpin,int8_t engMasPinIn=-1,int8_t cockPinIn=-1,\
+                   int8_t startPinIn=-1,int8_t airPinIn=-1)
 {
   // set bin variables
   rPin=inRPin;
   gPin=inGPin;
   bPin=inBPin;
-  throt1Pin=inthrot1Pin;
+  throtPin=inthrotPin;
   jptPin=inJPTpin;
+  cockPin=cockPinIn;
 
   // set pin modes
-  pinMode(rPin, OUTPUT);
+  pinMode(rPin, OUTPUT);     // output
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
-  pinMode(throt1Pin, INPUT);
   pinMode(jptPin, OUTPUT);
+  pinMode(throtPin, INPUT); // input
+  if(engMasPinIn>=0){    // if we are using fuel cocks etc.
+    pinMode(engMasPinIn,INPUT);   
+    pinMode(cockPin,INPUT);   
+    pinMode(startPinIn,INPUT);   
+    pinMode(airPinIn,INPUT);   
+  }
 
   // set all pins LOW
   digitalWrite(rPin,LOW);
@@ -152,7 +163,7 @@ void engine::setup(unsigned char inRPin,unsigned char inGPin,\
   analogWrite(jptPin,0);
   
   // inputs
-  throtPos1=0.0; // starts with throttle closed
+  throtPos=0.0;  // starts with throttle closed
   cockPos=1;     // hard-coded open for now, as now switch
   airStart=1;    // hard-coded open for now
   engMaster=1;   // hard-coded open for now
@@ -176,7 +187,7 @@ void engine::setup(unsigned char inRPin,unsigned char inGPin,\
 void engine::readInputs()
 {
   //throttle
-  throtPos1=(float)map(analogRead(throt1Pin), 0, 1024, 0, maxRPM);
+  throtPos=(float)map(analogRead(throtPin), 0, 1024, 0, maxRPM);
 
   return;
 }
@@ -197,7 +208,7 @@ void engine::determineState()
   
 
   // determine delta fuel
-  if(cockPos)dFuel=throtPos1-rpm1;
+  if(cockPos)dFuel=throtPos-rpm1;
   else       dFuel=-1.0*rpm1;
 
   // update rpm and temperatures
@@ -208,18 +219,6 @@ void engine::determineState()
 
   //set tachometer phase
   setPhase(thisTime,dTime);
-
-  #ifdef DEBUG
-  /*Serial.print("ThrotPos: ");
-  Serial.print(throtPos1);
-  Serial.print(" RPM: ");
-  Serial.print(rpm1);
-  Serial.print(" dtime ");
-  Serial.print(dTime);
-  Serial.print(" dFuel ");
-  Serial.print(dFuel);
-  Serial.print("\n");*/
-  #endif
 
   return;
 }
@@ -250,14 +249,6 @@ void engine::writeState()
   // JPT gauge, write voltage
   analogWrite(jptPin,(int)temp1);
 
-  #ifdef DEBUG
-  //Serial.print("ThrotPos: ");
-  //Serial.print(throtPos1);
-  //Serial.print(" RPM: ");
-  //Serial.print(rpm1);
-  //Serial.print("\n");
-  #endif
-
   return;
 }
 
@@ -279,9 +270,9 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are inRPin, inGPin, inBPin, inthrot1Pin
+  // pins are inRPin, inGPin, inBPin, inthrotPin
   eng1.setup(4,5,6,A5,3);
-  //eng2.setup(1,2,3,7,9,13,A6);
+  eng2.setup(7,8,9,A6,2);
 }
 
 /*##############################*/
@@ -291,15 +282,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  //eng2.readInputs();
+  eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  //eng2.determineState();
+  eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  //eng2.writeState();
+  eng2.writeState();
 
 }/*main loop*/
 

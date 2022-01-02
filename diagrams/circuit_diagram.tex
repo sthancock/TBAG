@@ -43,7 +43,22 @@ The engine RPM gauge is a 3-phase delta type motor. It runs at up to approximate
 
 
 \subsection{Jet pipe temperature gauge (TGT)}
-The JPT gauge is a simple voltage reader. An input of 0 V sets the needle at min deflection and an input of approximately 18 mV sets the needle at max deflection. The instrument resistance is 33.5 \(\Omega\).
+The JPT gauge is a simple voltage reader. An input of 0 V sets the needle at min deflection and an input of approximately 18 mV sets the needle at max deflection. The instrument resistance is 33.5 \(\Omega\). The circuit diagram is shown in figure~\ref{FIGjpt_driver}.
+
+\begin{figure}[!hbtp]
+\centering
+\begin{circuitikz} \draw
+(0,0) [battery,l=PWM]{} to (0,2) -- (0,2)
+  to[R=9.3 \(k \Omega\)] (0,4) -- (0,6)
+  to[voltmeter, l=18 mV] (4,6) -- (4,4)
+  to [C=22 \(\mu f\)] (0,4) -- (4,4)
+  to (4,0) node[ground]{}
+;
+\end{circuitikz}
+\caption{\small{JPT driver circuit diagram. The voltmeter represents the JPT gauge and the voltage input the Arduino PWM output pin.}}
+\label{FIGjpt_driver}
+\end{figure}
+
 
 
 

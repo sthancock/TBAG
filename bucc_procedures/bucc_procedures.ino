@@ -33,8 +33,10 @@ class engine{
 
     // throttle controls
     float throtPos1;  // throttle position, in %
-    char cockPos;     // fuel cock position. On/off
-    char airStart;    // air start position. On/off
+    bool engMaster;   // engine master switch
+    bool cockPos;     // fuel cock position. On/off
+    bool engStart;    // engine start switch
+    bool airStart;    // air start position. On/off
   
     // throttle internals
     float tachAng;     // phase angle of tachometer
@@ -72,11 +74,10 @@ void engine::setPhase(float thisTime,float dTime)
     dAng=360.0*maxRPM*rpm1/100.0;
 
     tachAng+=dAng*dTime;
-    //tachAng=(float)((int)tachAng%360);
 
     // to prevent loss of precision when running for long periods
     while(tachAng>360000.0){   // 1000 rotations at a time to save
-      tachAng-=360000.0;        // computational time
+      tachAng-=360000.0;       // computational time
     }
     while(tachAng<0.0){   // keep positive
       tachAng+=360.0;
@@ -153,6 +154,8 @@ void engine::setup(unsigned char inRPin,unsigned char inGPin,\
   throtPos1=0.0; // starts with throttle closed
   cockPos=1;     // hard-coded open for now, as now switch
   airStart=1;    // hard-coded open for now
+  engMaster=1;   // hard-coded open for now
+  engStart=1;    // hard-coded open for now
 
   // internals
   tachAng=0.0;

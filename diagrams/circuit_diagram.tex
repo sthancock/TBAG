@@ -4,26 +4,51 @@
 \usepackage{graphics}
 \usepackage{rotating}
 \usepackage{subfigure}
-\usepackage{longtable}
+\usepackage{circuitikz}
 
 
 \begin{document}
-\title{Circuit diamgrams for a Buccaneer procedures trainer}
+\title{Circuit diagrams for a Buccaneer procedures trainer}
 \author{Steven~Hancock}
 
 \maketitle
 
+\pagebreak
+\tableofcontents
+\listoffigures
+\pagebreak
 
 \section{Introduction}
 This contains the circuit diagrams needed for a Buccaneer procedures trainer, driven by an Arduino using a real Buccaneer cockpit.
 
 
 \section{Diagrams}
+This section contains circuit diagrams for each instrument, and then a master diagram showing all the wiring.
+
+\subsection{Engine RPM gauge}
+The engine RPM gauge is a 3-phase delta type motor. It runs at up to approximately 5,100 rpm (85 Hz) and can achieve full speed with a 12 V DC supply. Each coil has a resistance of 40 \(\Omega\). The input wires are marked ``A'', ``B'' and ``C''.
+
+
+\begin{figure}[!hbtp]
+\centering
+\begin{circuitikz} \draw
+(0,0) to[battery] (0,4)
+  to[ammeter] (4,4) -- (4,0)
+  to[lamp] (0,0)
+;
+\end{circuitikz}
+\caption{\small{Circuit diagram test}}
+\label{FIGtest}
+\end{figure}
+
+
+\subsection{Jet pipe temperature gauge (TGT)}
+The JPT gauge is a simple voltage reader. An input of 0 V sets the needle at min deflection and an input of approximately 18 mV sets the needle at max deflection. The instrument resistance is 33.5 \(\Omega\).
 
 
 
 
-\section*{Acknowledgments}
+\section*{Acknowledgements}
 Thanks to Scott Bouchard for providing the circuit description needed to drive the RPM gauges. Thanks to Peter Newman and Adam Tanton for help with the practical electronics.
 
 

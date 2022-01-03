@@ -12,10 +12,10 @@
 /*global variables*/
 
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
-const float throtGate=0.1*maxRPM;  // min throttle gate position
-const float tRate=50.0/60.0;       // engine RPM increase rate with fuel, in % per second
-const float asRate=30.0/60.0;      // engine RPM increase rate with air start, in % per second
-const float engDecRate=-15.0/60.0; // engine RPM decrease rate, in % per second
+const float throtGate=0.01*maxRPM;  // min throttle gate position
+const float tRate=30.0/60.0;       // engine RPM increase rate with fuel, in % per second
+const float asRate=60.0/60.0;      // engine RPM increase rate with air start, in % per second
+const float engDecRate=-40.0/60.0; // engine RPM decrease rate, in % per second
 
 /*#####################################*/
 /*hold data and functions for engines*/
@@ -202,8 +202,6 @@ void engine::readInputs()
   engMaster=digitalRead(engMasPin);
   starting=digitalRead(startPin);
 
-  //cockPos-airStart=engMaster=1;
-
   return;
 }/*engine::readInputs*/
 
@@ -230,7 +228,7 @@ void engine::determineState()
     if(engMaster&&(engStart||starting)&&airStart){  // start procedure
       starting=1;
       dRPM=asRate*dTime;
-    }else dRPM=engDecRate;
+    }else dRPM=engDecRate*dTime;
   }else{  // engine is running
     starting=0; // startup has finished
     
@@ -310,8 +308,8 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are inRPin, inGPin, inBPin, inthrotPin
-  eng1.setup(4,5,6,A5,3,22,23,24,25);
+  // pins are redPin, greenPin, bluePin,throtPin, inJPTpin,engMasPin,cockPin,startPin,airPin
+  eng1.setup(4,5,6,A5,3,25,24,23,22);
   eng2.setup(7,8,9,A6,2,26,27,28,29);
 }
 

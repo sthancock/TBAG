@@ -13,7 +13,9 @@
 
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
 const float throtGate=0.1*maxRPM;  // min throttle gate position
-const float tRate=34.0/50.0;       // throttle change rate, in % per second
+const float tRate=50.0/60.0;       // engine RPM increase rate with fuel, in % per second
+const float asRate=30.0/60.0;      // engine RPM increase rate with air start, in % per second
+const float engDecRate=-15.0/60.0; // engine RPM decrease rate, in % per second
 
 /*#####################################*/
 /*hold data and functions for engines*/
@@ -30,14 +32,14 @@ class engine{
     // methods
     void setPhase(float,float);
 
-    // throttle controls
+    // engine controls
     float throtPos;   // throttle position, in %
     bool engMaster;   // engine master switch
     bool cockPos;     // fuel cock position. On/off
     bool engStart;    // engine start switch
     bool airStart;    // air start position. On/off
   
-    // throttle internals
+    // engine internals
     float tachAng;     // phase angle of tachometer
     int8_t rMode;     // Red phase +ve or -ve
     int8_t gMode;     // Green phase +ve or -ve
@@ -46,10 +48,12 @@ class engine{
     int8_t lastGmode; // Last red phase mode
     int8_t lastBmode; // Last red phase mode
     float tim;        // time now
+    bool alight;      // is fuel alight, off/on
+    bool starting;    // engine startup procedure running
   
     // throttle outputs
-    float rpm1;        // tachometer RPM, in %
-    float temp1;       // exhaust temperature
+    float rpm;        // tachometer RPM, in %
+    float temp;        // exhaust temperature
 
     // arduino pins
     int8_t rPin;     // RPM gauge red phase output
@@ -73,8 +77,8 @@ void engine::setPhase(float thisTime,float dTime)
   float rAng=0,gAng=0,bAng=0;
   uint32_t angFrac=0,offset=0;
 
-  if(rpm1>0.001){
-    dAng=360.0*maxRPM*rpm1/100.0;
+  if(rpm>0.001){
+    dAng=360.0*maxRPM*rpm/100.0;
 
     tachAng+=dAng*dTime;
 
@@ -101,7 +105,7 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print("Pos ");
   Serial.print(throtPos); 
   Serial.print(" RPM ");
-  Serial.print(rpm1*maxRPM,4);
+  Serial.print(rpm*maxRPM,4);
   Serial.print(" time ");
   Serial.print(tim,4);
   Serial.print(" ang ");
@@ -118,7 +122,8 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print(tim);
   Serial.print(" dtim ");
   Serial.print(dTime,10);
-
+  Serial.print(" alight ");
+  Serial.print(alight);
   Serial.print("\n");
   #endif
 
@@ -130,8 +135,8 @@ void engine::setPhase(float thisTime,float dTime)
 /*internal setup*/
 
 void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
-                   int8_t inJPTpin,int8_t engMasPinIn=-1,int8_t cockPinIn=-1,\
-                   int8_t startPinIn=-1,int8_t airPinIn=-1)
+                   int8_t inJPTpin,int8_t engMasPinIn,int8_t cockPinIn,\
+                   int8_t startPinIn,int8_t airPinIn)
 {
   // set bin variables
   rPin=inRPin;
@@ -140,6 +145,9 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   throtPin=inthrotPin;
   jptPin=inJPTpin;
   cockPin=cockPinIn;
+  engMasPin=engMasPinIn;
+  startPin=startPinIn;
+  airPin=airPinIn;
 
   // set pin modes
   pinMode(rPin, OUTPUT);     // output
@@ -147,14 +155,12 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   pinMode(bPin, OUTPUT);
   pinMode(jptPin, OUTPUT);
   pinMode(throtPin, INPUT); // input
-  if(engMasPinIn>=0){    // if we are using fuel cocks etc.
-    pinMode(engMasPinIn,INPUT);   
-    pinMode(cockPin,INPUT);   
-    pinMode(startPinIn,INPUT);   
-    pinMode(airPinIn,INPUT);   
-  }
+  pinMode(engMasPin,INPUT);   
+  pinMode(cockPin,INPUT);   
+  pinMode(startPin,INPUT);   
+  pinMode(airPin,INPUT);   
 
-  // set all pins LOW
+  // set all output pins LOW
   digitalWrite(rPin,LOW);
   digitalWrite(gPin,LOW);
   digitalWrite(bPin,LOW);
@@ -162,17 +168,19 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   
   // inputs
   throtPos=0.0;  // starts with throttle closed
-  cockPos=1;     // hard-coded open for now, as now switch
-  airStart=1;    // hard-coded open for now
-  engMaster=1;   // hard-coded open for now
-  engStart=1;    // hard-coded open for now
+  cockPos=0;     // all switches off for now
+  airStart=0;    // all switches off for now
+  engMaster=0;   // all switches off for now
+  engStart=0;    // all switches off for now
+  starting=0;    // all switches off for now
 
   // internals
   tachAng=0.0;
+  alight=0;
   
   // outputs
-  rpm1=0.0;     // everything off
-  temp1=0.0;
+  rpm=0.0;     // everything off
+  temp=0.0;
   rMode=gMode=bMode=0;
   lastRmode=lastGmode=lastBmode=0;
 
@@ -188,6 +196,14 @@ void engine::readInputs()
   //throttle
   throtPos=(float)map(analogRead(throtPin), 0, 1024, 0, maxRPM);
 
+  //engine switches
+  cockPos=digitalRead(cockPin);
+  airStart=digitalRead(airPin);
+  engMaster=digitalRead(engMasPin);
+  starting=digitalRead(startPin);
+
+  //cockPos-airStart=engMaster=1;
+
   return;
 }/*engine::readInputs*/
 
@@ -197,26 +213,49 @@ void engine::readInputs()
 
 void engine::determineState()
 {
-  float dFuel=0;
+  float dFuel=0,dRPM=0,dTemp=0;
   float thisTime=0,dTime=0;
   
-
   // time change since last call?
   thisTime=micros()/1000000.0;
   dTime=thisTime-tim;
   tim=thisTime;
+
+  // is engine alight?
+  if(cockPos&&(throtPos>=throtGate)&&(rpm>=0.12*maxRPM))alight=1;    
+  else                                                  alight=0;
+
+  // is engine alight or not?
+  if(!alight){ // needs air start to spin
+    if(engMaster&&(engStart||starting)&&airStart){  // start procedure
+      starting=1;
+      dRPM=asRate*dTime;
+    }else dRPM=engDecRate;
+  }else{  // engine is running
+    starting=0; // startup has finished
+    
+    // determine delta fuel
+    dFuel=throtPos-rpm;
+    dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
+  }
+
+  // determine temperature change
+  if(alight){
+    dTemp=throtPos/maxRPM; //-rpm/1000.0;
+  }else{
+    dTemp=-1.0*temp/500.0; //-rpm/1000.0;
+  }
   
-
-  // determine delta fuel
-  if(cockPos)dFuel=throtPos-rpm1;
-  else       dFuel=-1.0*rpm1;
-
   // update rpm and temperatures
-  rpm1+=dFuel*tRate*dTime;
-  temp1=255.0*rpm1/maxRPM;
-  //if(rpm1>50.0)temp1=50.0;
-  //else         temp1=0.0;
+  rpm+=dRPM;
+  if(rpm<0.0)rpm=0.0;
 
+  if(alight)temp=500.0;
+  else temp=0.0;
+  //temp+=dTemp;
+  if(temp<0.0)temp=0.0;
+  else if(temp>800)temp=800.0;
+  
   //set tachometer phase
   setPhase(thisTime,dTime);
 
@@ -247,7 +286,7 @@ void engine::writeState()
   }
 
   // JPT gauge, write voltage
-  analogWrite(jptPin,(int)temp1);
+  analogWrite(jptPin,(int)(temp*255.0/800.0));
 
   return;
 }/*engine::writeState*/
@@ -272,8 +311,8 @@ void setup()
 
   // set positions and pin numbers
   // pins are inRPin, inGPin, inBPin, inthrotPin
-  eng1.setup(4,5,6,A5,3);
-  eng2.setup(7,8,9,A6,2);
+  eng1.setup(4,5,6,A5,3,22,23,24,25);
+  eng2.setup(7,8,9,A6,2,26,27,28,29);
 }
 
 /*##############################*/

@@ -12,10 +12,10 @@
 /*global variables*/
 
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
-const float throtGate=0.01*maxRPM;  // min throttle gate position
+const float throtGate=0.1*maxRPM;  // min throttle gate position
 const float tRate=30.0/60.0;       // engine RPM increase rate with fuel, in % per second
 const float asRate=60.0/60.0;      // engine RPM increase rate with air start, in % per second
-const float engDecRate=-40.0/60.0; // engine RPM decrease rate, in % per second
+const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
 
 /*#####################################*/
 /*hold data and functions for engines*/
@@ -172,11 +172,11 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   airStart=0;    // all switches off for now
   engMaster=0;   // all switches off for now
   engStart=0;    // all switches off for now
-  starting=0;    // all switches off for now
 
   // internals
   tachAng=0.0;
   alight=0;
+  starting=0;
   
   // outputs
   rpm=0.0;     // everything off
@@ -200,7 +200,7 @@ void engine::readInputs()
   cockPos=digitalRead(cockPin);
   airStart=digitalRead(airPin);
   engMaster=digitalRead(engMasPin);
-  starting=digitalRead(startPin);
+  engStart=digitalRead(startPin);
 
   return;
 }/*engine::readInputs*/
@@ -220,8 +220,10 @@ void engine::determineState()
   tim=thisTime;
 
   // is engine alight?
-  if(cockPos&&(throtPos>=throtGate)&&(rpm>=0.12*maxRPM))alight=1;    
-  else                                                  alight=0;
+  if(alight||starting||engStart){
+    if(cockPos&&(throtPos>=throtGate)&&(rpm>=0.12*maxRPM))alight=1;    
+    else                                                  alight=0;
+  }else alight=0;
 
   // is engine alight or not?
   if(!alight){ // needs air start to spin
@@ -234,6 +236,7 @@ void engine::determineState()
     
     // determine delta fuel
     dFuel=throtPos-rpm;
+    //if(dFuel<0.0)dFuel=engDecRate;
     dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
   }
 
@@ -253,7 +256,7 @@ void engine::determineState()
   //temp+=dTemp;
   if(temp<0.0)temp=0.0;
   else if(temp>800)temp=800.0;
-  
+
   //set tachometer phase
   setPhase(thisTime,dTime);
 

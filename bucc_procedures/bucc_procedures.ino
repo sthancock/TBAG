@@ -177,6 +177,7 @@ class engine{
     bool alight;      // is fuel alight, off/on
     bool starting;    // engine startup procedure running
     bool oilPress;    // oil pressure low light
+    bool lpSpinLight; // LP spin light on
     float tim;        // time for LP spin light
   
     // engine outputs
@@ -190,7 +191,7 @@ class engine{
     int8_t startPin; // engine start switch pin
     int8_t aiaPin;   // air start pin
     int8_t oilPlight;// oil pressure light
-    int8_t lpLight;  // LP spin light
+    int8_t lpLightPin;/*LP spin light pin*/
 }; /*engine class*/
 
 
@@ -246,7 +247,7 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   startPin=startPinIn;
   aiaPin=aiaPinIn;
   oilPlight=oilPlightIn;
-  lpLight=lpLightIn;
+  lpLightPin=lpLightIn;
 
   // set pin modes
   pinMode(jptPin, OUTPUT);
@@ -256,12 +257,12 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   pinMode(startPin,INPUT);   
   pinMode(aiaPin,INPUT);   
   pinMode(oilPlight,OUTPUT);   
-  pinMode(lpLight,OUTPUT);   
+  pinMode(lpLightPin,OUTPUT);   
 
   // set all output pins LOW
   analogWrite(jptPin,0);
   digitalWrite(oilPlight,HIGH);
-  digitalWrite(lpLight,LOW);
+  digitalWrite(lpLightPin,LOW);
 
   // inputs
   throtPos=0.0;  // starts with throttle closed
@@ -342,7 +343,8 @@ void engine::setLPspinLight(float lpRPM)
     dTime=thisTime-tim;  
     tim=thisTime;
 
-  }else lpLight=0;
+    lpSpinLight=1;
+  }else lpSpinLight=0;
   
   return;
 }/*engine::setLPspinLight*/
@@ -374,7 +376,7 @@ void engine::determineState()
   else                            oilPress=1;
 
   // is LP spin light on?
-  setLPspinLight(lpStage.getRPM());
+  setLPspinLight(hpStage.getRPM());
 
   return;
 }/*engine::determineState*/
@@ -425,8 +427,8 @@ void engine::writeState()
   else        digitalWrite(oilPlight,LOW);
 
   // LP turbine light
-  if(lpLight)digitalWrite(lpLight,HIGH);
-  else       digitalWrite(lpLight,LOW);
+  if(lpSpinLight)digitalWrite(lpLightPin,HIGH);
+  else           digitalWrite(lpLightPin,LOW);
 
   return;
 }/*engine::writeState*/
@@ -465,15 +467,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  eng2.readInputs();
+  //eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  eng2.determineState();
+  //eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  eng2.writeState();
+  //eng2.writeState();
 
   return;
 }/*main loop*/

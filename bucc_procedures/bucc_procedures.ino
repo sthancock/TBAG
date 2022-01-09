@@ -159,6 +159,7 @@ class engine{
 
   private:
     // methods
+    void setJPT();
 
     // two stages
     jetStage hpStage;
@@ -302,24 +303,12 @@ void engine::readInputs()
 
 
 /*##############################*/
-/*adjust the states*/
+/*determine JPT*/
 
-void engine::determineState()
+void engine::setJPT()
 {
   float dTemp=0;
-  bool blank=0;
 
-  // is engine alight?
-  if(alight||starting||engStart){
-    if(cockPos&&(throtPos>=throtGate)&&(hpStage.getRPM()>=0.12*maxRPM))alight=1;    
-    else                                                               alight=0;
-  }else alight=0;
-
-  // update RPMs
-  starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
-  blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
-
-  // set temperatures
   // determine temperature change
   if(alight){
     dTemp=throtPos/maxRPM; //-rpm/1000.0;
@@ -332,6 +321,30 @@ void engine::determineState()
   //temp+=dTemp;
   if(temp<0.0)temp=0.0;
   else if(temp>800)temp=800.0;
+
+  return;
+}/*engine::setJPT*/
+
+/*##############################*/
+/*adjust the states*/
+
+void engine::determineState()
+{
+  bool blank=0;
+
+  // is engine alight?
+  if(alight||starting||engStart){
+    if(cockPos&&(throtPos>=throtGate)&&(hpStage.getRPM()>=0.12*maxRPM))alight=1;    
+    else                                                               alight=0;
+  }else alight=0;
+
+  // update RPMs
+  starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
+  blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
+
+
+  // set temperatures
+  setJPT();
 
   // is oil pressure warning on?
   if(hpStage.getRPM()>0.35*maxRPM)oilPress=0;

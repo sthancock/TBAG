@@ -423,8 +423,8 @@ void engine::writeState()
   analogWrite(jptPin,(int)(temp*255.0/800.0));
 
   // oil pressure
-  if(oilPress)digitalWrite(oilPlight,HIGH);
-  else        digitalWrite(oilPlight,LOW);
+  if(oilPress&&engMaster)digitalWrite(oilPlight,HIGH);
+  else                   digitalWrite(oilPlight,LOW);
 
   // LP turbine light
   if(lpSpinLight)digitalWrite(lpLightPin,HIGH);

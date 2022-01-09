@@ -132,6 +132,7 @@ void jetStage::setup(bool isHP,int8_t inAPin,int8_t inBPin,int8_t inCPin)
 
     
   }/*HP/LP switch*/
+
   return;  
 }/*jetStage::setup*/
 
@@ -375,6 +376,7 @@ void engine::writeState()
 
   // turbine stage outputs
   hpStage.writeState();
+  lpStage.writeState();
 
   // JPT gauge, write voltage
   analogWrite(jptPin,(int)(temp*255.0/800.0));
@@ -405,9 +407,9 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are redPin, greenPin, bluePin,throtPin, inJPTpin,engMasPin,cockPin,startPin,aiaPin,lpLightPin,oilPlightPin
+  // pins are RPMaPin, RPMbPin, RPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
   eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
-  eng2.setup(7,8,9,A6,2,30,31,32,33,26,35);
+  eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 }
 
 /*##############################*/

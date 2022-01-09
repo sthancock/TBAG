@@ -25,7 +25,7 @@ class jetStage{
   public:
     // methods
     void setup(bool,int8_t,int8_t,int8_t);
-    void determineRPM(bool,bool,bool,bool,float);
+    bool determineRPM(bool,bool,bool,bool,float);
     float getRPM();
     void writeState();
 
@@ -64,7 +64,7 @@ class jetStage{
 /*#####################################*/
 /*determine stage RPM*/
 
-void jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starting,float throtPos)
+bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starting,float throtPos)
 {
   float dRPM=0,dFuel=0;
   float thisTime=0,dTime=0;
@@ -97,7 +97,7 @@ void jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starti
   //set tachometer phase
   setPhase(thisTime,dTime);
 
-  return;
+  return(starting);
 }/*jetStage::determineRPM*/
 
 
@@ -316,7 +316,7 @@ void engine::determineState()
   }else alight=0;
 
   // update RPMs
-  hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
+  starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
 
   // determine temperature change
   if(alight){

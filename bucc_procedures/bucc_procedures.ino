@@ -316,7 +316,7 @@ void engine::determineState()
 
   // update RPMs
   starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
-  blank=lpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
+  blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
 
   // determine temperature change
   if(alight){

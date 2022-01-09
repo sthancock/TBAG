@@ -120,8 +120,10 @@ if __name__=="__main__":
 
 
   # loop over time
-  while(tim<300.0):
-    if(tim>=150):
+  while(tim<500.0):
+    if(tim>300):
+      eng.throtPos=0.0
+    elif(tim>=150):
       eng.throtPos=1.0
 
     eng.determineState(dTim)

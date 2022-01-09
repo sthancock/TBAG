@@ -319,14 +319,14 @@ void engine::determineState()
   starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
   blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
 
+  // set temperatures
   // determine temperature change
   if(alight){
     dTemp=throtPos/maxRPM; //-rpm/1000.0;
   }else{
     dTemp=-1.0*temp/500.0; //-rpm/1000.0;
   }  
-
-  // set temperatures
+  // hack for now
   if(alight)temp=500.0;
   else temp=0.0;
   //temp+=dTemp;

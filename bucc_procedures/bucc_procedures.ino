@@ -160,6 +160,7 @@ class engine{
   private:
     // methods
     void setJPT();
+    void setLPspinLight(float);
 
     // two stages
     jetStage hpStage;
@@ -176,6 +177,7 @@ class engine{
     bool alight;      // is fuel alight, off/on
     bool starting;    // engine startup procedure running
     bool oilPress;    // oil pressure low light
+    float tim;        // time for LP spin light
   
     // engine outputs
     float temp;       // exhaust temperature
@@ -325,6 +327,27 @@ void engine::setJPT()
   return;
 }/*engine::setJPT*/
 
+
+/*##############################*/
+/*is LP spin light on?*/
+
+void engine::setLPspinLight(float lpRPM)
+{
+  float thisTime=0,dTime=0;
+  
+  /*is it spinning slowly?*/
+  if((lpRPM>0.00001)&&(lpRPM<0.3*maxRPM)){
+    // time change since last call?
+    thisTime=micros()/1000000.0;
+    dTime=thisTime-tim;  
+    tim=thisTime;
+
+  }else lpLight=0;
+  
+  return;
+}/*engine::setLPspinLight*/
+
+
 /*##############################*/
 /*adjust the states*/
 
@@ -349,6 +372,9 @@ void engine::determineState()
   // is oil pressure warning on?
   if(hpStage.getRPM()>0.35*maxRPM)oilPress=0;
   else                            oilPress=1;
+
+  // is LP spin light on?
+  setLPspinLight(lpStage.getRPM());
 
   return;
 }/*engine::determineState*/
@@ -397,6 +423,10 @@ void engine::writeState()
   // oil pressure
   if(oilPress)digitalWrite(oilPlight,HIGH);
   else        digitalWrite(oilPlight,LOW);
+
+  // LP turbine light
+  if(lpLight)digitalWrite(lpLight,HIGH);
+  else       digitalWrite(lpLight,LOW);
 
   return;
 }/*engine::writeState*/

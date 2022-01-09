@@ -81,7 +81,7 @@ bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starti
       dRPM=asRate*dTime;
     }else dRPM=engDecRate*dTime;
   }else{  // engine is running
-    starting=0; // startup has finished
+    if(rpm>=0.5*maxRPM)starting=0; // startup has finished
     
     // determine delta fuel
     dFuel=throtPos-rpm;
@@ -384,9 +384,8 @@ void engine::determineState()
   else                            oilPress=1;
 
   // is LP spin light on?
-  //if(starting||engStart)
-  setLPspinLight(hpStage.getRPM());
-  //else                  lpSpinLight=0;
+  if(starting||engStart)setLPspinLight(hpStage.getRPM());
+  else                  lpSpinLight=0;
 
   return;
 }/*engine::determineState*/

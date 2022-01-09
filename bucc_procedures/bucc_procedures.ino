@@ -23,14 +23,128 @@ const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
 
 class jetStage{
   public:
+    // methods
+    void setup(bool,int8_t,int8_t,int8_t);
+    void determineRPM(bool,bool,bool,bool,float);
+    float getRPM();
+    void writeState();
 
   private:
+    // methods
+    void setPhase(float,float);
+
+    // data
+
+    // stage characteristics
     float mass;  // turbine mass
     float radH;  // half the turbine radius
     float coefF; // coefficient of friction
 
+    // stage outputs
+    float rpm;   // stage tachometer RPM, in %
+
+    // engine internals
+    float tachAng;     // phase angle of tachometer
+    int8_t aMode;     // A wire phase +ve or gnd
+    int8_t bMode;     // B wire phase +ve or gnd
+    int8_t cMode;     // C wire phase +ve or gnd
+    int8_t lastAmode; // Last A phase mode
+    int8_t lastBmode; // Last B phase mode
+    int8_t lastCmode; // Last C phase mode
+    float tim;        // time now
+
+    // arduino pins
+    int8_t aPin;     // RPM gauge red phase output
+    int8_t bPin;     // RPM gauge green phase output
+    int8_t cPin;     // RPM gauge blue phase output
   
 };/*class to hold jet stage, LP or HP*/
+
+
+/*#####################################*/
+/*determine stage RPM*/
+
+void jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starting,float throtPos)
+{
+  float dRPM=0,dFuel=0;
+  float thisTime=0,dTime=0;
+  
+  // time change since last call?
+  thisTime=micros()/1000000.0;
+  dTime=thisTime-tim;
+  tim=thisTime;
+
+  // is engine alight or not?
+  if(!alight){ // needs air start to spin
+    if(engMaster&&starting&&airStart){  // start procedure
+      starting=1;
+      dRPM=asRate*dTime;
+    }else dRPM=engDecRate*dTime;
+  }else{  // engine is running
+    starting=0; // startup has finished
+    
+    // determine delta fuel
+    dFuel=throtPos-rpm;
+    //if(dFuel<0.0)dFuel=engDecRate;
+    dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
+  }
+
+  
+  // update rpm and temperatures
+  rpm+=dRPM;
+  if(rpm<0.0)rpm=0.0;
+
+  //set tachometer phase
+  setPhase(thisTime,dTime);
+
+  return;
+}/*jetStage::determineRPM*/
+
+
+/*#####################################*/
+/*set parameters for HP or LP stage*/
+
+void jetStage::setup(bool isHP,int8_t inAPin,int8_t inBPin,int8_t inCPin)
+{
+
+  // setup pins
+  aPin=inAPin;
+  bPin=inBPin;
+  cPin=inCPin;
+  
+  pinMode(aPin, OUTPUT);     // output
+  pinMode(bPin, OUTPUT);
+  pinMode(cPin, OUTPUT);
+  digitalWrite(aPin,LOW);
+  digitalWrite(bPin,LOW);
+  digitalWrite(cPin,LOW);
+  
+  // stage starting point
+  tachAng=0.0;
+  rpm=0.0;
+  aMode=bMode=cMode=0;
+  lastAmode=lastBmode=lastCmode=0;
+
+  // stage charsacteristics
+  if(isHP){  // set up for HP stage
+
+    
+  }else{     // set up for LP stage
+
+    
+  }
+
+  return;  
+}/*jetStage::setup*/
+
+
+/*#####################################*/
+/*retrurn private RPM*/
+
+float jetStage::getRPM()
+{
+  return(rpm);
+}/*jetStage*/
 
 
 /*#####################################*/
@@ -46,7 +160,10 @@ class engine{
 
   private:
     // methods
-    void setPhase(float,float);
+
+    // two stages
+    jetStage hpStage;
+    jetStage lpStage;
 
     // engine controls
     float throtPos;   // throttle position, in %
@@ -56,26 +173,14 @@ class engine{
     bool airStart;    // air start position. On/off
   
     // engine internals
-    float tachAng;     // phase angle of tachometer
-    int8_t aMode;     // A wire phase +ve or gnd
-    int8_t bMode;     // B wire phase +ve or gnd
-    int8_t cMode;     // C wire phase +ve or gnd
-    int8_t lastAmode; // Last A phase mode
-    int8_t lastBmode; // Last B phase mode
-    int8_t lastCmode; // Last C phase mode
-    float tim;        // time now
     bool alight;      // is fuel alight, off/on
     bool starting;    // engine startup procedure running
     bool oilPress;    // oil pressure low light
   
     // engine outputs
-    float rpm;        // tachometer RPM, in %
     float temp;       // exhaust temperature
 
     // arduino pins
-    int8_t aPin;     // RPM gauge red phase output
-    int8_t bPin;     // RPM gauge green phase output
-    int8_t cPin;     // RPM gauge blue phase output
     int8_t throtPin; // input for throttle
     int8_t jptPin;   // JPT gauge output
     int8_t engMasPin;// engine master switch pin
@@ -90,7 +195,7 @@ class engine{
 /*##############################*/
 /*determine tachometer phases*/
 
-void engine::setPhase(float thisTime,float dTime)
+void jetStage::setPhase(float thisTime,float dTime)
 {
   float dAng=0;  // angle change rate
   float rAng=0,gAng=0,bAng=0;
@@ -120,32 +225,6 @@ void engine::setPhase(float thisTime,float dTime)
     else                                               aMode=0;
   }else aMode=bMode=cMode=0;
 
-  #ifdef DEBUG  // write to display to monitor
-  Serial.print("Pos ");
-  Serial.print(throtPos); 
-  Serial.print(" RPM ");
-  Serial.print(rpm*maxRPM,4);
-  Serial.print(" time ");
-  Serial.print(tim,4);
-  Serial.print(" ang ");
-  Serial.print(tachAng);
-  Serial.print(" angFrac ");
-  Serial.print(angFrac);
-  Serial.print(" aMode ");
-  Serial.print(aMode);
-  Serial.print(" bMode ");
-  Serial.print(bMode);
-  Serial.print(" cMode ");
-  Serial.print(cMode);
-  Serial.print(" tim ");
-  Serial.print(tim);
-  Serial.print(" dtim ");
-  Serial.print(dTime,10);
-  Serial.print(" alight ");
-  Serial.print(alight);
-  Serial.print("\n");
-  #endif
-
   return;
 }/*engine::setPhase*/
 
@@ -158,9 +237,6 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
                    int8_t startPinIn,int8_t aiaPinIn,int8_t lpLightIn,int8_t oilPlightIn)
 {
   // set bin variables
-  aPin=inAPin;
-  bPin=inBPin;
-  cPin=inCPin;
   throtPin=inthrotPin;
   jptPin=inJPTpin;
   cockPin=cockPinIn;
@@ -171,9 +247,6 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   lpLight=lpLightIn;
 
   // set pin modes
-  pinMode(aPin, OUTPUT);     // output
-  pinMode(bPin, OUTPUT);
-  pinMode(cPin, OUTPUT);
   pinMode(jptPin, OUTPUT);
   pinMode(throtPin, INPUT); // input
   pinMode(engMasPin,INPUT);   
@@ -183,16 +256,11 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   pinMode(oilPlight,OUTPUT);   
   pinMode(lpLight,OUTPUT);   
 
-
   // set all output pins LOW
-  digitalWrite(aPin,LOW);
-  digitalWrite(bPin,LOW);
-  digitalWrite(cPin,LOW);
   analogWrite(jptPin,0);
   digitalWrite(oilPlight,HIGH);
   digitalWrite(lpLight,LOW);
 
-  
   // inputs
   throtPos=0.0;  // starts with throttle closed
   cockPos=0;     // all switches off for now
@@ -200,17 +268,17 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   engMaster=0;   // all switches off for now
   engStart=0;    // all switches off for now
 
+  // setup two stages
+  hpStage.setup(1,inAPin,inBPin,inCPin);
+  //lpStage.setup();
+
   // internals
-  tachAng=0.0;
   alight=0;
   starting=0;
   oilPress=1;
   
   // outputs
-  rpm=0.0;     // everything off
-  temp=0.0;
-  aMode=bMode=cMode=0;
-  lastAmode=lastBmode=lastCmode=0;
+  temp=0.0;   // everything off
 
   return;
 }/*engine::setup*/
@@ -239,67 +307,45 @@ void engine::readInputs()
 
 void engine::determineState()
 {
-  float dFuel=0,dRPM=0,dTemp=0;
-  float thisTime=0,dTime=0;
-  
-  // time change since last call?
-  thisTime=micros()/1000000.0;
-  dTime=thisTime-tim;
-  tim=thisTime;
+  float dTemp=0;
 
   // is engine alight?
   if(alight||starting||engStart){
-    if(cockPos&&(throtPos>=throtGate)&&(rpm>=0.12*maxRPM))alight=1;    
-    else                                                  alight=0;
+    if(cockPos&&(throtPos>=throtGate)&&(hpStage.getRPM()>=0.12*maxRPM))alight=1;    
+    else                                                               alight=0;
   }else alight=0;
 
-  // is engine alight or not?
-  if(!alight){ // needs air start to spin
-    if(engMaster&&(engStart||starting)&&airStart){  // start procedure
-      starting=1;
-      dRPM=asRate*dTime;
-    }else dRPM=engDecRate*dTime;
-  }else{  // engine is running
-    starting=0; // startup has finished
-    
-    // determine delta fuel
-    dFuel=throtPos-rpm;
-    //if(dFuel<0.0)dFuel=engDecRate;
-    dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
-  }
+  // update RPMs
+  hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
 
   // determine temperature change
   if(alight){
     dTemp=throtPos/maxRPM; //-rpm/1000.0;
   }else{
     dTemp=-1.0*temp/500.0; //-rpm/1000.0;
-  }
-  
-  // update rpm and temperatures
-  rpm+=dRPM;
-  if(rpm<0.0)rpm=0.0;
+  }  
 
+  // set temperatures
   if(alight)temp=500.0;
   else temp=0.0;
   //temp+=dTemp;
   if(temp<0.0)temp=0.0;
   else if(temp>800)temp=800.0;
 
-  //set tachometer phase
-  setPhase(thisTime,dTime);
-
-  if(rpm>0.35*maxRPM)oilPress=0;
-  else               oilPress=1;
+  // is oil pressure warning on?
+  if(hpStage.getRPM()>0.35*maxRPM)oilPress=0;
+  else                            oilPress=1;
 
   return;
 }/*engine::determineState*/
 
 
 /*##############################*/
-/*write state*/
+/*write stage state*/
 
-void engine::writeState()
+void jetStage::writeState()
 {
+  
   // RPM gauge, write 3 phases
   if(aMode!=lastAmode){
     if(aMode==1)digitalWrite(aPin,HIGH);
@@ -316,6 +362,19 @@ void engine::writeState()
     else        digitalWrite(cPin,LOW);
     lastCmode=cMode;
   }
+
+  return;
+}/*jetStage::writeState*/
+
+
+/*##############################*/
+/*write engine state*/
+
+void engine::writeState()
+{
+
+  // turbine stage outputs
+  hpStage.writeState();
 
   // JPT gauge, write voltage
   analogWrite(jptPin,(int)(temp*255.0/800.0));

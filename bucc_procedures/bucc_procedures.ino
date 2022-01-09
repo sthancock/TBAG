@@ -423,7 +423,10 @@ void setup()
   // pins are RPMaPin, RPMbPin, RPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
   eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
   eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
-}
+
+  return;
+}/*setup*/
+
 
 /*##############################*/
 /*main loop*/
@@ -442,6 +445,7 @@ void loop() {
   eng1.writeState();
   eng2.writeState();
 
+  return;
 }/*main loop*/
 
 /*the end*/

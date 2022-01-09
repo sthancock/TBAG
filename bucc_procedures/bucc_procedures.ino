@@ -23,7 +23,7 @@ const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
 class engine{
   public:
     // methods
-    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
+    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
     void readInputs();
     void determineState();
     void writeState();
@@ -50,6 +50,7 @@ class engine{
     float tim;        // time now
     bool alight;      // is fuel alight, off/on
     bool starting;    // engine startup procedure running
+    bool oilPress;    // oil pressure low
   
     // throttle outputs
     float rpm;        // tachometer RPM, in %
@@ -65,6 +66,8 @@ class engine{
     int8_t cockPin;  // fuel cock pin        
     int8_t startPin; // engine start switch pin
     int8_t airPin;   // air start pin
+    int8_t oilPlight;// oil pressure light
+    int8_t lpLight;  // LP spin light
 }; /*engine class*/
 
 
@@ -136,7 +139,7 @@ void engine::setPhase(float thisTime,float dTime)
 
 void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
                    int8_t inJPTpin,int8_t engMasPinIn,int8_t cockPinIn,\
-                   int8_t startPinIn,int8_t airPinIn)
+                   int8_t startPinIn,int8_t airPinIn,int8_t lpLightIn,int8_t oilPlightIn)
 {
   // set bin variables
   rPin=inRPin;
@@ -148,6 +151,8 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   engMasPin=engMasPinIn;
   startPin=startPinIn;
   airPin=airPinIn;
+  oilPlight=oilPlightIn;
+  lpLight=lpLightIn;
 
   // set pin modes
   pinMode(rPin, OUTPUT);     // output
@@ -159,12 +164,18 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   pinMode(cockPin,INPUT);   
   pinMode(startPin,INPUT);   
   pinMode(airPin,INPUT);   
+  pinMode(oilPlight,OUTPUT);   
+  pinMode(lpLight,OUTPUT);   
+
 
   // set all output pins LOW
   digitalWrite(rPin,LOW);
   digitalWrite(gPin,LOW);
   digitalWrite(bPin,LOW);
   analogWrite(jptPin,0);
+  digitalWrite(oilPlight,HIGH);
+  digitalWrite(lpLight,LOW);
+
   
   // inputs
   throtPos=0.0;  // starts with throttle closed
@@ -177,6 +188,7 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   tachAng=0.0;
   alight=0;
   starting=0;
+  oilPress=1;
   
   // outputs
   rpm=0.0;     // everything off
@@ -260,6 +272,9 @@ void engine::determineState()
   //set tachometer phase
   setPhase(thisTime,dTime);
 
+  if(rpm>0.35*maxRPM)oilPress=0;
+  else               oilPress=1;
+
   return;
 }/*engine::determineState*/
 
@@ -289,6 +304,10 @@ void engine::writeState()
   // JPT gauge, write voltage
   analogWrite(jptPin,(int)(temp*255.0/800.0));
 
+  // oil pressure
+  if(oilPress)digitalWrite(oilPlight,HIGH);
+  else        digitalWrite(oilPlight,LOW);
+
   return;
 }/*engine::writeState*/
 
@@ -312,8 +331,8 @@ void setup()
 
   // set positions and pin numbers
   // pins are redPin, greenPin, bluePin,throtPin, inJPTpin,engMasPin,cockPin,startPin,airPin
-  eng1.setup(4,5,6,A5,3,25,24,23,22);
-  eng2.setup(7,8,9,A6,2,26,27,28,29);
+  eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
+  //eng2.setup(7,8,9,A6,2,26,27,28,29);
 }
 
 /*##############################*/
@@ -323,15 +342,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  eng2.readInputs();
+  //eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  eng2.determineState();
+  //eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  eng2.writeState();
+  //eng2.writeState();
 
 }/*main loop*/
 

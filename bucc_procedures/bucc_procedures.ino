@@ -17,6 +17,9 @@ const float tRate=30.0/60.0;       // engine RPM increase rate with fuel, in % p
 const float asRate=60.0/60.0;      // engine RPM increase rate with air start, in % per second
 const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
 
+const float airStartF=5.0;   // Air start force in N
+const float jetForc=10.0;    // fuel burn force in N per unit
+
 
 /*#####################################*/
 /*hold data for a jet stage*/
@@ -36,9 +39,8 @@ class jetStage{
     // data
 
     // stage characteristics
-    float mass;  // turbine mass
-    float radH;  // half the turbine radius
-    float coefF; // coefficient of friction
+    float massRad;  // turbine mass times radius
+    float rpmEquil;  // rpm equilibrium
 
     // stage outputs
     float rpm;   // stage tachometer RPM, in %
@@ -126,10 +128,12 @@ void jetStage::setup(bool isHP,int8_t inAPin,int8_t inBPin,int8_t inCPin)
 
   // stage charsacteristics
   if(isHP){  // set up for HP stage
-
+    massRad=200.0*0.5;
+    rpmEquil=0.5;
     
   }else{     // set up for LP stage
-
+    massRad=400.0*0.75;
+    rpmEquil=0.4;
     
   }/*HP/LP switch*/
 

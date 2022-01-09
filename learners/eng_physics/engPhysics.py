@@ -28,7 +28,6 @@ class jetStage():
       self.r=0.75
       self.equil=0.4
 
-    self.isHP=isHP
     self.rpm=0.0
 
     return

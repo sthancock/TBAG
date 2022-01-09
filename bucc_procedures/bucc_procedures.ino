@@ -334,17 +334,25 @@ void engine::setJPT()
 
 void engine::setLPspinLight(float lpRPM)
 {
-  float thisTime=0,dTime=0;
-  
+  static float tLastChange;
+ 
   /*is it spinning slowly?*/
   if((lpRPM>0.00001)&&(lpRPM<0.3*maxRPM)){
-    // time change since last call?
-    thisTime=micros()/1000000.0;
-    dTime=thisTime-tim;  
-    tim=thisTime;
 
-    lpSpinLight=1;
-  }else lpSpinLight=0;
+    if(tLastChange<0.0)tLastChange=tim;
+
+    // time change since last call?
+    tim=micros()/1000000.0;
+    if((tim-tLastChange)>=0.5){
+      if(lpSpinLight)lpSpinLight=0;
+      else           lpSpinLight=1;
+
+      tLastChange=tim;
+    }
+  }else{
+    lpSpinLight=0;
+    tLastChange=-1.0;
+  }
   
   return;
 }/*engine::setLPspinLight*/
@@ -376,7 +384,9 @@ void engine::determineState()
   else                            oilPress=1;
 
   // is LP spin light on?
+  //if(starting||engStart)
   setLPspinLight(hpStage.getRPM());
+  //else                  lpSpinLight=0;
 
   return;
 }/*engine::determineState*/

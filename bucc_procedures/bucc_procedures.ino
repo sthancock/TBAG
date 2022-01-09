@@ -89,7 +89,6 @@ bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starti
     dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
   }
 
-  
   // update rpm and temperatures
   rpm+=dRPM;
   if(rpm<0.0)rpm=0.0;
@@ -132,8 +131,7 @@ void jetStage::setup(bool isHP,int8_t inAPin,int8_t inBPin,int8_t inCPin)
   }else{     // set up for LP stage
 
     
-  }
-
+  }/*HP/LP switch*/
   return;  
 }/*jetStage::setup*/
 
@@ -270,7 +268,7 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
 
   // setup two stages
   hpStage.setup(1,inAPin,inBPin,inCPin);
-  //lpStage.setup();
+  lpStage.setup(0,40,41,42);
 
   // internals
   alight=0;
@@ -308,6 +306,7 @@ void engine::readInputs()
 void engine::determineState()
 {
   float dTemp=0;
+  bool blank=0;
 
   // is engine alight?
   if(alight||starting||engStart){
@@ -317,6 +316,7 @@ void engine::determineState()
 
   // update RPMs
   starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
+  blank=lpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
 
   // determine temperature change
   if(alight){

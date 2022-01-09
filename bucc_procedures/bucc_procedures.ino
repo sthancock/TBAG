@@ -17,6 +17,22 @@ const float tRate=30.0/60.0;       // engine RPM increase rate with fuel, in % p
 const float asRate=60.0/60.0;      // engine RPM increase rate with air start, in % per second
 const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
 
+
+/*#####################################*/
+/*hold data for a jet stage*/
+
+class jetStage{
+  public:
+
+  private:
+    float mass;  // turbine mass
+    float radH;  // half the turbine radius
+    float coefF; // coefficient of friction
+
+  
+};/*class to hold jet stage, LP or HP*/
+
+
 /*#####################################*/
 /*hold data and functions for engines*/
 
@@ -41,31 +57,31 @@ class engine{
   
     // engine internals
     float tachAng;     // phase angle of tachometer
-    int8_t rMode;     // Red phase +ve or -ve
-    int8_t gMode;     // Green phase +ve or -ve
-    int8_t bMode;     // Blue phase +ve or -ve
-    int8_t lastRmode; // Last red phase mode
-    int8_t lastGmode; // Last red phase mode
-    int8_t lastBmode; // Last red phase mode
+    int8_t aMode;     // A wire phase +ve or gnd
+    int8_t bMode;     // B wire phase +ve or gnd
+    int8_t cMode;     // C wire phase +ve or gnd
+    int8_t lastAmode; // Last A phase mode
+    int8_t lastBmode; // Last B phase mode
+    int8_t lastCmode; // Last C phase mode
     float tim;        // time now
     bool alight;      // is fuel alight, off/on
     bool starting;    // engine startup procedure running
-    bool oilPress;    // oil pressure low
+    bool oilPress;    // oil pressure low light
   
-    // throttle outputs
+    // engine outputs
     float rpm;        // tachometer RPM, in %
-    float temp;        // exhaust temperature
+    float temp;       // exhaust temperature
 
     // arduino pins
-    int8_t rPin;     // RPM gauge red phase output
-    int8_t gPin;     // RPM gauge green phase output
-    int8_t bPin;     // RPM gauge blue phase output
+    int8_t aPin;     // RPM gauge red phase output
+    int8_t bPin;     // RPM gauge green phase output
+    int8_t cPin;     // RPM gauge blue phase output
     int8_t throtPin; // input for throttle
     int8_t jptPin;   // JPT gauge output
     int8_t engMasPin;// engine master switch pin
     int8_t cockPin;  // fuel cock pin        
     int8_t startPin; // engine start switch pin
-    int8_t airPin;   // air start pin
+    int8_t aiaPin;   // air start pin
     int8_t oilPlight;// oil pressure light
     int8_t lpLight;  // LP spin light
 }; /*engine class*/
@@ -96,13 +112,13 @@ void engine::setPhase(float thisTime,float dTime)
     angFrac=(uint32_t)tachAng%360;
 
     // Decide which pins are ground and which are live
-    if((angFrac>(0+offset))&&(angFrac<(180-offset)))bMode=1;
-    else                                            bMode=0;
-    if((angFrac>(120+offset))&&(angFrac<(300-offset)))gMode=1;
-    else                                              gMode=0;
-    if(((angFrac>(240+offset))||(angFrac<(60-offset))))rMode=1;
-    else                                               rMode=0;
-  }else rMode=gMode=bMode=0;
+    if((angFrac>(0+offset))&&(angFrac<(180-offset)))cMode=1;
+    else                                            cMode=0;
+    if((angFrac>(120+offset))&&(angFrac<(300-offset)))bMode=1;
+    else                                              bMode=0;
+    if(((angFrac>(240+offset))||(angFrac<(60-offset))))aMode=1;
+    else                                               aMode=0;
+  }else aMode=bMode=cMode=0;
 
   #ifdef DEBUG  // write to display to monitor
   Serial.print("Pos ");
@@ -115,12 +131,12 @@ void engine::setPhase(float thisTime,float dTime)
   Serial.print(tachAng);
   Serial.print(" angFrac ");
   Serial.print(angFrac);
-  Serial.print(" rMode ");
-  Serial.print(rMode);
-  Serial.print(" gMode ");
-  Serial.print(gMode);
+  Serial.print(" aMode ");
+  Serial.print(aMode);
   Serial.print(" bMode ");
   Serial.print(bMode);
+  Serial.print(" cMode ");
+  Serial.print(cMode);
   Serial.print(" tim ");
   Serial.print(tim);
   Serial.print(" dtim ");
@@ -137,41 +153,41 @@ void engine::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
+void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
                    int8_t inJPTpin,int8_t engMasPinIn,int8_t cockPinIn,\
-                   int8_t startPinIn,int8_t airPinIn,int8_t lpLightIn,int8_t oilPlightIn)
+                   int8_t startPinIn,int8_t aiaPinIn,int8_t lpLightIn,int8_t oilPlightIn)
 {
   // set bin variables
-  rPin=inRPin;
-  gPin=inGPin;
+  aPin=inAPin;
   bPin=inBPin;
+  cPin=inCPin;
   throtPin=inthrotPin;
   jptPin=inJPTpin;
   cockPin=cockPinIn;
   engMasPin=engMasPinIn;
   startPin=startPinIn;
-  airPin=airPinIn;
+  aiaPin=aiaPinIn;
   oilPlight=oilPlightIn;
   lpLight=lpLightIn;
 
   // set pin modes
-  pinMode(rPin, OUTPUT);     // output
-  pinMode(gPin, OUTPUT);
+  pinMode(aPin, OUTPUT);     // output
   pinMode(bPin, OUTPUT);
+  pinMode(cPin, OUTPUT);
   pinMode(jptPin, OUTPUT);
   pinMode(throtPin, INPUT); // input
   pinMode(engMasPin,INPUT);   
   pinMode(cockPin,INPUT);   
   pinMode(startPin,INPUT);   
-  pinMode(airPin,INPUT);   
+  pinMode(aiaPin,INPUT);   
   pinMode(oilPlight,OUTPUT);   
   pinMode(lpLight,OUTPUT);   
 
 
   // set all output pins LOW
-  digitalWrite(rPin,LOW);
-  digitalWrite(gPin,LOW);
+  digitalWrite(aPin,LOW);
   digitalWrite(bPin,LOW);
+  digitalWrite(cPin,LOW);
   analogWrite(jptPin,0);
   digitalWrite(oilPlight,HIGH);
   digitalWrite(lpLight,LOW);
@@ -193,8 +209,8 @@ void engine::setup(int8_t inRPin,int8_t inGPin,int8_t inBPin,int8_t inthrotPin,\
   // outputs
   rpm=0.0;     // everything off
   temp=0.0;
-  rMode=gMode=bMode=0;
-  lastRmode=lastGmode=lastBmode=0;
+  aMode=bMode=cMode=0;
+  lastAmode=lastBmode=lastCmode=0;
 
   return;
 }/*engine::setup*/
@@ -210,7 +226,7 @@ void engine::readInputs()
 
   //engine switches
   cockPos=digitalRead(cockPin);
-  airStart=digitalRead(airPin);
+  airStart=digitalRead(aiaPin);
   engMaster=digitalRead(engMasPin);
   engStart=digitalRead(startPin);
 
@@ -285,20 +301,20 @@ void engine::determineState()
 void engine::writeState()
 {
   // RPM gauge, write 3 phases
-  if(rMode!=lastRmode){
-    if(rMode==1)digitalWrite(rPin,HIGH);
-    else        digitalWrite(rPin,LOW);
-    lastRmode=rMode;
-  }  
-  if(gMode!=lastGmode){
-    if(gMode==1)digitalWrite(gPin,HIGH);
-    else        digitalWrite(gPin,LOW);
-    lastGmode=gMode;
+  if(aMode!=lastAmode){
+    if(aMode==1)digitalWrite(aPin,HIGH);
+    else        digitalWrite(aPin,LOW);
+    lastAmode=aMode;
   }  
   if(bMode!=lastBmode){
     if(bMode==1)digitalWrite(bPin,HIGH);
     else        digitalWrite(bPin,LOW);
     lastBmode=bMode;
+  }  
+  if(cMode!=lastCmode){
+    if(cMode==1)digitalWrite(cPin,HIGH);
+    else        digitalWrite(cPin,LOW);
+    lastCmode=cMode;
   }
 
   // JPT gauge, write voltage
@@ -330,9 +346,9 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are redPin, greenPin, bluePin,throtPin, inJPTpin,engMasPin,cockPin,startPin,airPin
+  // pins are redPin, greenPin, bluePin,throtPin, inJPTpin,engMasPin,cockPin,startPin,aiaPin,lpLightPin,oilPlightPin
   eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
-  //eng2.setup(7,8,9,A6,2,26,27,28,29);
+  eng2.setup(7,8,9,A6,2,30,31,32,33,26,35);
 }
 
 /*##############################*/
@@ -342,15 +358,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  //eng2.readInputs();
+  eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  //eng2.determineState();
+  eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  //eng2.writeState();
+  eng2.writeState();
 
 }/*main loop*/
 

@@ -130,12 +130,10 @@ void jetStage::setup(bool isHP,int8_t inAPin,int8_t inBPin,int8_t inCPin)
   if(isHP){  // set up for HP stage
     massRad=200.0*0.5;
     rpmEquil=0.5;
-    
   }else{     // set up for LP stage
     massRad=400.0*0.75;
     rpmEquil=0.4;
-    
-  }/*HP/LP switch*/
+  }/*HP-LP switch*/
 
   return;  
 }/*jetStage::setup*/
@@ -223,7 +221,7 @@ void jetStage::setPhase(float thisTime,float dTime)
 
     angFrac=(uint32_t)tachAng%360;
 
-    // Decide which pins are ground and which are live
+    // Decide which pins are ground (0) and which are live (1)
     if((angFrac>(0+offset))&&(angFrac<(180-offset)))cMode=1;
     else                                            cMode=0;
     if((angFrac>(120+offset))&&(angFrac<(300-offset)))bMode=1;
@@ -379,7 +377,6 @@ void engine::determineState()
   starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
   blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
 
-
   // set temperatures
   setJPT();
 
@@ -465,7 +462,7 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are RPMaPin, RPMbPin, RPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
+  // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
   eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
   eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 

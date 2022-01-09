@@ -22,11 +22,11 @@ class jetStage():
     if(isHP):
       self.m=200.0
       self.r=0.5
-      self.coefF=0.4
+      self.equil=0.5
     else:  # LP
-      self.m=200.0
-      self.r=0.5
-      self.coefF=0.4
+      self.m=400.0
+      self.r=0.75
+      self.equil=0.4
 
     self.isHP=isHP
     self.rpm=0.0
@@ -38,18 +38,15 @@ class jetStage():
   def determineRPM(self,airStart,throtGate,throtPos,otherRPM,dTim):
     '''Determine RPM of a stage'''
 
-    airForce=1.0   # force from airstart
-    jetForce=2.0   # force per unit throttle position
+    airForce=5.0   # force from airstart
+    jetForce=10.0   # force per unit throttle position
 
-    if(self.isHP==0):
-      forceLoss=(1.0-otherRPM)*100.0
-    else:
-      forceLoss=self.rpm*jetForce
+    forceLoss=self.rpm*jetForce
 
     # at min throttle, HP is in equilibrium at 50% RPM
     # at max throttle, HP is in equilibrium at 100% RPM
 
-    f=airStart*airForce+throtGate*jetForce*(throtPos/2.0+0.5)-(forceLoss)
+    f=airStart*airForce+throtGate*jetForce*(throtPos/2.0+self.equil)-(forceLoss)
     a=f/(self.m*self.r*0.5)
 
     self.rpm=self.rpm+a*dTim
@@ -127,7 +124,6 @@ if __name__=="__main__":
   while(tim<300.0):
     if(tim>=150):
       eng.throtPos=1.0
-
 
     eng.determineState(dTim)
 

@@ -1,0 +1,8 @@
+
+
+LP spin light needs harmonising between engines. Engine 2 will overwrite engine 1. Could use two sets of wires? Better in software.
+
+LP spin light needs to be made to blink. Use most efficient time possible.
+
+Need to add proper phsyics for HP spool up, LP spool and TGT temperature.
+

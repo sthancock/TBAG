@@ -23,12 +23,12 @@ class jetStage():
       self.m=200.0
       self.r=0.5
       self.equil=0.5
-      self.coefF=0.1
+      self.coefF=1
     else:  # LP
       self.m=400.0
       self.r=0.75
       self.equil=0.4
-      self.coefF=0.1
+      self.coefF=1.1
 
     self.rpm=0.0
 
@@ -51,6 +51,8 @@ class jetStage():
     a=f/(self.m*self.r*0.5)
 
     self.rpm=self.rpm+a*dTim
+    if(self.rpm<0.0):
+      self.rpm=0.0
 
 
 
@@ -76,17 +78,6 @@ class engine():
 
   def determineState(self,dTim):
     '''Determine state of the engine'''
-
-    # is air start on?
-    if(self.hpStage.rpm<0.35):
-      self.airStart=1
-    else:
-      self.airStart=0
-
-    if(self.hpStage.rpm>=0.12):
-      self.throtGate=1
-    else:
-      self.throtGate=0
 
     # determine HP rpm
     self.hpStage.determineRPM(self.airStart,self.throtGate,self.throtPos,self.lpStage.rpm,dTim)
@@ -123,6 +114,14 @@ if __name__=="__main__":
 
   # loop over time
   while(tim<700.0):
+
+    if((tim<500)&(eng.hpStage.rpm>=0.12)):
+      eng.throtGate=1
+
+    if((tim<500)&(eng.hpStage.rpm<0.35)):
+      eng.airStart=1
+    else:
+      eng.airStart=0
 
     if(tim>500):
       eng.throtPos=0.0

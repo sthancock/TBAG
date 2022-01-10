@@ -23,10 +23,12 @@ class jetStage():
       self.m=200.0
       self.r=0.5
       self.equil=0.5
+      self.coefF=0.1
     else:  # LP
       self.m=400.0
       self.r=0.75
       self.equil=0.4
+      self.coefF=0.1
 
     self.rpm=0.0
 
@@ -45,7 +47,7 @@ class jetStage():
     # at min throttle, HP is in equilibrium at 50% RPM
     # at max throttle, HP is in equilibrium at 100% RPM
 
-    f=airStart*airForce+throtGate*jetForce*(throtPos/2.0+self.equil)-(forceLoss)
+    f=airStart*airForce+throtGate*jetForce*(throtPos/2.0+self.equil)-(forceLoss+self.coefF)
     a=f/(self.m*self.r*0.5)
 
     self.rpm=self.rpm+a*dTim
@@ -120,7 +122,11 @@ if __name__=="__main__":
 
 
   # loop over time
-  while(tim<500.0):
+  while(tim<700.0):
+
+    if(tim>500):
+      eng.throtPos=0.0
+      eng.throtGate=0
     if(tim>300):
       eng.throtPos=0.0
     elif(tim>=150):

@@ -14,11 +14,6 @@
 const float maxRPM=5100/60.0;      // maximum RPM for tachometers, in Hz
 const float throtGate=0.1*maxRPM;  // min throttle gate position
 const float tRate=30.0/60.0;       // engine RPM increase rate with fuel, in % per second
-const float asRate=60.0/60.0;      // engine RPM increase rate with air start, in % per second
-const float engDecRate=-100.0/60.0; // engine RPM decrease rate, in % per second
-
-const float airStartF=5.0;   // Air start force in N
-const float jetForc=10.0;    // fuel burn force in N per unit
 
 
 /*#####################################*/
@@ -28,7 +23,7 @@ class jetStage{
   public:
     // methods
     void setup(bool,int8_t,int8_t,int8_t);
-    bool determineRPM(bool,bool,bool,bool,float);
+    void determineRPM(float);
     float getRPM();
     void writeState();
 
@@ -66,7 +61,7 @@ class jetStage{
 /*#####################################*/
 /*determine stage RPM*/
 
-bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starting,float throtPos)
+void jetStage::determineRPM(float throtPos)
 {
   float dRPM=0,dFuel=0;
   float thisTime=0,dTime=0;
@@ -76,20 +71,11 @@ bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starti
   dTime=thisTime-tim;
   tim=thisTime;
 
-  // is engine alight or not?
-  if(!alight){ // needs air start to spin
-    if(engMaster&&starting&&airStart){  // start procedure
-      starting=1;
-      dRPM=asRate*dTime;
-    }else dRPM=engDecRate*dTime;
-  }else{  // engine is running
-    if(rpm>=0.5*maxRPM)starting=0; // startup has finished
     
-    // determine delta fuel
-    dFuel=throtPos-rpm;
-    //if(dFuel<0.0)dFuel=engDecRate;
-    dRPM=dFuel*tRate*dTime+asRate*dTime*(float)airStart;
-  }
+  // determine delta fuel
+  dFuel=throtPos-rpm;
+  //if(dFuel<0.0)dFuel=engDecRate;
+  dRPM=dFuel*tRate*dTime;
 
   // update rpm and temperatures
   rpm+=dRPM;
@@ -98,7 +84,7 @@ bool jetStage::determineRPM(bool alight,bool airStart,bool engMaster,bool starti
   //set tachometer phase
   setPhase(thisTime,dTime);
 
-  return(starting);
+  return;
 }/*jetStage::determineRPM*/
 
 
@@ -176,8 +162,6 @@ class engine{
     bool airStart;    // air start position. On/off
   
     // engine internals
-    bool alight;      // is fuel alight, off/on
-    bool starting;    // engine startup procedure running
     bool oilPress;    // oil pressure low light
     bool lpSpinLight; // LP spin light on
     float tim;        // time for LP spin light
@@ -278,8 +262,6 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   lpStage.setup(0,40,41,42);
 
   // internals
-  alight=0;
-  starting=0;
   oilPress=1;
   
   // outputs
@@ -315,15 +297,7 @@ void engine::setJPT()
   float dTemp=0;
 
   // determine temperature change
-  if(alight){
-    dTemp=throtPos/maxRPM; //-rpm/1000.0;
-  }else{
-    dTemp=-1.0*temp/500.0; //-rpm/1000.0;
-  }  
-  // hack for now
-  if(alight)temp=500.0;
-  else temp=0.0;
-  //temp+=dTemp;
+  dTemp=throtPos/maxRPM; //-rpm/1000.0;
   if(temp<0.0)temp=0.0;
   else if(temp>800)temp=800.0;
 
@@ -367,15 +341,9 @@ void engine::determineState()
 {
   bool blank=0;
 
-  // is engine alight?
-  if(alight||starting||engStart){
-    if(cockPos&&(throtPos>=throtGate)&&(hpStage.getRPM()>=0.12*maxRPM))alight=1;    
-    else                                                               alight=0;
-  }else alight=0;
-
   // update RPMs
-  starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
-  blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
+  hpStage.determineRPM(throtPos);
+  lpStage.determineRPM(throtPos);
 
   // set temperatures
   setJPT();
@@ -385,8 +353,7 @@ void engine::determineState()
   else                            oilPress=1;
 
   // is LP spin light on?
-  if(starting||engStart)setLPspinLight(hpStage.getRPM());
-  else                  lpSpinLight=0;
+  setLPspinLight(hpStage.getRPM());
 
   return;
 }/*engine::determineState*/
@@ -464,7 +431,6 @@ void setup()
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
   eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
-  eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 
   return;
 }/*setup*/
@@ -477,15 +443,12 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  //eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  //eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  //eng2.writeState();
 
   return;
 }/*main loop*/

@@ -6,6 +6,16 @@
 /*########################*/
 
 
+
+/*#####################################*/
+/*pin assignments*/
+
+#define THROT1 A5
+
+// pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
+//eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
+
+
 //#define DEBUG
 
 /*#####################################*/
@@ -463,7 +473,7 @@ void setup()
 
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
-  eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
+  eng1.setup(4,5,6,THROT1,3,25,24,23,22,26,27);
   eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 
   return;

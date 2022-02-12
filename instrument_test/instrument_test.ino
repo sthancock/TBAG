@@ -6,7 +6,7 @@
 /*########################*/
 
 
-//#define DEBUG
+#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -140,7 +140,7 @@ float jetStage::getRPM()
 class engine{
   public:
     // methods
-    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
+    void setup(int8_t,int8_t,int8_t,int8_t,int8_t);
     void readInputs();
     void determineState();
     void writeState();
@@ -148,7 +148,6 @@ class engine{
   private:
     // methods
     void setJPT();
-    void setLPspinLight(float);
 
     // two stages
     jetStage hpStage;
@@ -156,14 +155,8 @@ class engine{
 
     // engine controls
     float throtPos;   // throttle position, in %
-    bool engMaster;   // engine master switch
-    bool cockPos;     // fuel cock position. On/off
-    bool engStart;    // engine start switch
-    bool airStart;    // air start position. On/off
   
     // engine internals
-    bool oilPress;    // oil pressure low light
-    bool lpSpinLight; // LP spin light on
     float tim;        // time for LP spin light
   
     // engine outputs
@@ -172,12 +165,6 @@ class engine{
     // arduino pins
     int8_t throtPin; // input for throttle
     int8_t jptPin;   // JPT gauge output
-    int8_t engMasPin;// engine master switch pin
-    int8_t cockPin;  // fuel cock pin        
-    int8_t startPin; // engine start switch pin
-    int8_t aiaPin;   // air start pin
-    int8_t oilPlight;// oil pressure light
-    int8_t lpLightPin;/*LP spin light pin*/
 }; /*engine class*/
 
 
@@ -222,47 +209,26 @@ void jetStage::setPhase(float thisTime,float dTime)
 /*internal setup*/
 
 void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
-                   int8_t inJPTpin,int8_t engMasPinIn,int8_t cockPinIn,\
-                   int8_t startPinIn,int8_t aiaPinIn,int8_t lpLightIn,int8_t oilPlightIn)
+                   int8_t inJPTpin)
 {
   // set bin variables
   throtPin=inthrotPin;
   jptPin=inJPTpin;
-  cockPin=cockPinIn;
-  engMasPin=engMasPinIn;
-  startPin=startPinIn;
-  aiaPin=aiaPinIn;
-  oilPlight=oilPlightIn;
-  lpLightPin=lpLightIn;
 
   // set pin modes
   pinMode(jptPin, OUTPUT);
   pinMode(throtPin, INPUT); // input
-  pinMode(engMasPin,INPUT);   
-  pinMode(cockPin,INPUT);   
-  pinMode(startPin,INPUT);   
-  pinMode(aiaPin,INPUT);   
-  pinMode(oilPlight,OUTPUT);   
-  pinMode(lpLightPin,OUTPUT);   
+ 
 
   // set all output pins LOW
   analogWrite(jptPin,0);
-  digitalWrite(oilPlight,HIGH);
-  digitalWrite(lpLightPin,LOW);
+
 
   // inputs
   throtPos=0.0;  // starts with throttle closed
-  cockPos=0;     // all switches off for now
-  airStart=0;    // all switches off for now
-  engMaster=0;   // all switches off for now
-  engStart=0;    // all switches off for now
 
   // setup two stages
   hpStage.setup(1,inAPin,inBPin,inCPin);
-  lpStage.setup(0,40,41,42);
-
-  // internals
-  oilPress=1;
   
   // outputs
   temp=0.0;   // everything off
@@ -278,12 +244,6 @@ void engine::readInputs()
 {
   //throttle
   throtPos=(float)map(analogRead(throtPin), 0, 1024, 0, maxRPM);
-
-  //engine switches
-  cockPos=digitalRead(cockPin);
-  airStart=digitalRead(aiaPin);
-  engMaster=digitalRead(engMasPin);
-  engStart=digitalRead(startPin);
 
   return;
 }/*engine::readInputs*/
@@ -306,35 +266,6 @@ void engine::setJPT()
 
 
 /*##############################*/
-/*is LP spin light on?*/
-
-void engine::setLPspinLight(float lpRPM)
-{
-  static float tLastChange;
- 
-  /*is it spinning slowly?*/
-  if((lpRPM>0.00001)&&(lpRPM<0.3*maxRPM)){
-
-    if(tLastChange<0.0)tLastChange=tim;
-
-    // time change since last call?
-    tim=micros()/1000000.0;
-    if((tim-tLastChange)>=0.5){
-      if(lpSpinLight)lpSpinLight=0;
-      else           lpSpinLight=1;
-
-      tLastChange=tim;
-    }
-  }else{
-    lpSpinLight=0;
-    tLastChange=-1.0;
-  }
-  
-  return;
-}/*engine::setLPspinLight*/
-
-
-/*##############################*/
 /*adjust the states*/
 
 void engine::determineState()
@@ -343,17 +274,9 @@ void engine::determineState()
 
   // update RPMs
   hpStage.determineRPM(throtPos);
-  lpStage.determineRPM(throtPos);
 
   // set temperatures
   setJPT();
-
-  // is oil pressure warning on?
-  if(hpStage.getRPM()>0.35*maxRPM)oilPress=0;
-  else                            oilPress=1;
-
-  // is LP spin light on?
-  setLPspinLight(hpStage.getRPM());
 
   return;
 }/*engine::determineState*/
@@ -399,14 +322,6 @@ void engine::writeState()
   // JPT gauge, write voltage
   analogWrite(jptPin,(int)(temp*255.0/800.0));
 
-  // oil pressure
-  if(oilPress&&engMaster)digitalWrite(oilPlight,HIGH);
-  else                   digitalWrite(oilPlight,LOW);
-
-  // LP turbine light
-  if(lpSpinLight)digitalWrite(lpLightPin,HIGH);
-  else           digitalWrite(lpLightPin,LOW);
-
   return;
 }/*engine::writeState*/
 
@@ -429,8 +344,8 @@ void setup()
   #endif
 
   // set positions and pin numbers
-  // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
-  eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
+  // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin
+  eng1.setup(4,5,6,A5,3);
 
   return;
 }/*setup*/

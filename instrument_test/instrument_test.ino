@@ -6,7 +6,7 @@
 /*########################*/
 
 
-#define DEBUG
+//#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -27,6 +27,9 @@ class jetStage{
     float getRPM();
     void writeState();
 
+    // stage outputs
+    float rpm;   // stage tachometer RPM, in %
+
   private:
     // methods
     void setPhase(float,float);
@@ -37,8 +40,6 @@ class jetStage{
     float massRad;  // turbine mass times radius
     float rpmEquil;  // rpm equilibrium
 
-    // stage outputs
-    float rpm;   // stage tachometer RPM, in %
 
     // engine internals
     float tachAng;     // phase angle of tachometer
@@ -274,6 +275,14 @@ void engine::determineState()
 
   // update RPMs
   hpStage.determineRPM(throtPos);
+
+  #ifdef DEBUG
+  Serial.print("Throtpos ");
+  Serial.print(throtPos);
+  Serial.print(" RPM ");
+  Serial.print(hpStage.rpm);
+  Serial.print("\n");
+  #endif
 
   // set temperatures
   setJPT();

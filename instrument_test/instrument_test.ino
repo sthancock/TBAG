@@ -354,7 +354,7 @@ void setup()
 
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin
-  eng1.setup(4,5,6,A5,3);
+  eng1.setup(4,5,7,A5,3);
 
   return;
 }/*setup*/

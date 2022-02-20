@@ -31,7 +31,7 @@
 //eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
 
 
-#define DEBUG
+//#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -401,7 +401,7 @@ void engine::determineState()
 
   // update RPMs
   starting=hpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
-  blank=lpStage.determineRPM(alight,0,engMaster,engStart||starting,throtPos);
+  blank=lpStage.determineRPM(alight,airStart,engMaster,engStart||starting,throtPos);
 
   // set temperatures
   setJPT();
@@ -419,6 +419,8 @@ void engine::determineState()
   Serial.print(throtPos);
   Serial.print(" HPrpm ");
   Serial.print(hpStage.getRPM());
+  Serial.print(" LPrpm ");
+  Serial.print(lpStage.getRPM());
   Serial.print(" JPT ");
   Serial.print(temp);
   Serial.print(" engSwitch ");

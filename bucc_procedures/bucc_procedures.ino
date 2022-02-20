@@ -414,6 +414,12 @@ void engine::determineState()
   if(starting||engStart)setLPspinLight(hpStage.getRPM());
   else                  lpSpinLight=0;
 
+  #ifdef DEBUG
+  Serial.print("Throt ");
+  Serial.print(throtPos);
+  Serial.print("\n");
+  #endif
+
   return;
 }/*engine::determineState*/
 

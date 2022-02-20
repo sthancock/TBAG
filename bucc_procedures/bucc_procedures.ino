@@ -179,7 +179,7 @@ float jetStage::getRPM()
 class engine{
   public:
     // methods
-    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
+    void setup(int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t,int8_t);
     void readInputs();
     void determineState();
     void writeState();
@@ -262,9 +262,10 @@ void jetStage::setPhase(float thisTime,float dTime)
 /*##############################*/
 /*internal setup*/
 
-void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
+void engine::setup(int8_t inHpAPin,int8_t inHpBPin,int8_t inHpCPin,int8_t inthrotPin,\
                    int8_t inJPTpin,int8_t engMasPinIn,int8_t cockPinIn,\
-                   int8_t startPinIn,int8_t aiaPinIn,int8_t lpLightIn,int8_t oilPlightIn)
+                   int8_t startPinIn,int8_t aiaPinIn,int8_t lpLightIn,int8_t oilPlightIn,\
+                   int8_t inLpAPin,int8_t inLpBPin,int8_t inLpCPin)
 {
   // set bin variables
   throtPin=inthrotPin;
@@ -299,8 +300,8 @@ void engine::setup(int8_t inAPin,int8_t inBPin,int8_t inCPin,int8_t inthrotPin,\
   engStart=0;    // all switches off for now
 
   // setup two stages
-  hpStage.setup(1,inAPin,inBPin,inCPin);
-  lpStage.setup(0,40,41,42);
+  hpStage.setup(1,inHpAPin,inHpBPin,inHpCPin);
+  lpStage.setup(0,inLpAPin,inLpAPin,inLpAPin);
 
   // internals
   alight=0;

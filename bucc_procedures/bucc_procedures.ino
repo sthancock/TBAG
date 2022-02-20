@@ -31,7 +31,7 @@
 //eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
 
 
-//#define DEBUG
+#define DEBUG
 
 /*#####################################*/
 /*global variables*/
@@ -417,6 +417,18 @@ void engine::determineState()
   #ifdef DEBUG
   Serial.print("Throt ");
   Serial.print(throtPos);
+  Serial.print(" HPrpm ");
+  Serial.print(hpStage.getRPM());
+  Serial.print(" JPT ");
+  Serial.print(temp);
+  Serial.print(" engSwitch ");
+  Serial.print(engMaster);
+  Serial.print(" cockPos ");
+  Serial.print(cockPos);
+  Serial.print(" engStart ");
+  Serial.print(engStart);
+  Serial.print(" airStart ");
+  Serial.print(airStart);
   Serial.print("\n");
   #endif
 

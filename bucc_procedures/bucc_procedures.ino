@@ -488,8 +488,8 @@ void setup()
 
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
-  eng1.setup(E1hpR,E1hpG,E1hpB,THROT1,E1jpt,E1mast,E1cock,E1START,AIRst,LPSPIN,E1OILP);
-  eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
+  eng1.setup(E1hpR,E1hpG,E1hpB,THROT1,E1jpt,E1mast,E1cock,E1START,AIRst,LPSPIN,E1OILP,E1lpR,E1lpG,E1lpB);
+  //eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 
   return;
 }/*setup*/

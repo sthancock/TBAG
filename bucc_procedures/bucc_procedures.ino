@@ -10,7 +10,22 @@
 /*#####################################*/
 /*pin assignments*/
 
+#define E1hpR 4
+#define E1hpG 5
+#define E1hpB 6
 #define THROT1 A5
+#define E1lpR 28
+#define E1lpG 29
+#define E1lpB 30
+#define E1jpt 3
+#define E1mast 25
+#define E1cock 24
+#define E1START 23
+#define AIRst 22
+#define LPSPIN 26
+#define E1OILP 27
+
+
 
 // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
 //eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
@@ -473,7 +488,7 @@ void setup()
 
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
-  eng1.setup(4,5,6,THROT1,3,25,24,23,22,26,27);
+  eng1.setup(E1hpR,E1hpG,E1hpB,THROT1,E1jpt,E1mast,E1cock,E1START,AIRst,LPSPIN,E1OILP);
   eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
 
   return;

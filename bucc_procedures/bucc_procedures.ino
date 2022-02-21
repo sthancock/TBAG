@@ -301,7 +301,7 @@ void engine::setup(int8_t inHpAPin,int8_t inHpBPin,int8_t inHpCPin,int8_t inthro
 
   // setup two stages
   hpStage.setup(1,inHpAPin,inHpBPin,inHpCPin);
-  lpStage.setup(0,inLpAPin,inLpAPin,inLpAPin);
+  lpStage.setup(0,inLpAPin,inLpBPin,inLpCPin);
 
   // internals
   alight=0;

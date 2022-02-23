@@ -10,19 +10,25 @@
 /*#####################################*/
 /*pin assignments*/
 
-#define E1hpR 4
-#define E1hpG 5
-#define E1hpB 6
+/*#############*/
+/*engines*/
+#define AIRst 22
+#define LPSPIN 26
+
+/*engine 1*/
+/*in*/
 #define THROT1 A5
+#define E1mast 25
+#define E1cock 24
+#define E1START 23
+/*out*/
+#define E1hpR 33
+#define E1hpG 32
+#define E1hpB 31
 #define E1lpR 28
 #define E1lpG 29
 #define E1lpB 30
 #define E1jpt 3
-#define E1mast 25
-#define E1cock 24
-#define E1START 23
-#define AIRst 22
-#define LPSPIN 26
 #define E1OILP 27
 
 

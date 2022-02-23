@@ -31,6 +31,22 @@
 #define E1jpt 3
 #define E1OILP 27
 
+/*engine 2*/
+/*in*/
+#define THROT2 A4
+#define E2mast 36
+#define E2cock 35
+#define E2START 34
+/*out*/
+#define E2hpR 42
+#define E2hpG 41
+#define E2hpB 40
+#define E2lpR 43
+#define E2lpG 38
+#define E2lpB 39
+#define E2jpt 4
+#define E2OILP 44
+
 
 
 // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
@@ -516,7 +532,7 @@ void setup()
   // set positions and pin numbers
   // pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
   eng1.setup(E1hpR,E1hpG,E1hpB,THROT1,E1jpt,E1mast,E1cock,E1START,AIRst,LPSPIN,E1OILP,E1lpR,E1lpG,E1lpB);
-  //eng2.setup(7,8,9,A6,2,30,31,32,22,26,35);
+  eng2.setup(E2hpR,E2hpG,E2hpB,THROT2,E2jpt,E2mast,E2cock,E2START,AIRst,LPSPIN,E2OILP,E2lpR,E2lpG,E2lpB);
 
   return;
 }/*setup*/
@@ -529,15 +545,15 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  //eng2.readInputs();
+  eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  //eng2.determineState();
+  eng2.determineState();
 
   // write outputs
   eng1.writeState();
-  //eng2.writeState();
+  eng2.writeState();
 
   return;
 }/*main loop*/

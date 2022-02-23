@@ -48,10 +48,12 @@
 #define E2OILP 44
 
 
+/*#####################################*/
 
-// pins are hpRPMaPin, hpRPMbPin, hpRPMcPin,throtPin,JPTpin,engMasPin,cockPin,startPin,airstartPin,lpLightPin,oilPlightPin
-//eng1.setup(4,5,6,A5,3,25,24,23,22,26,27);
 
+/*turn debug flags on or off*/
+/*note that with DEBUG on the program runs*/
+/*too slow for RPM gauges to spin         */
 
 //#define DEBUG
 

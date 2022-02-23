@@ -553,7 +553,7 @@ void loop() {
 
   // write outputs
   eng1.writeState();
-  eng2.writeState();
+  //eng2.writeState();
 
   return;
 }/*main loop*/

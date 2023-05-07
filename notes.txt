@@ -1,0 +1,3 @@
+Dolls eyes take 15V to move. Use XL6009E1 buck to get that from 12 V.
+
+I also have a LM2596 down converter which I believe was to get 9V to the arduino input. Was there anything else that needed it?

@@ -9,3 +9,4 @@ This folder contains circuit diagrams for the circuits used in this Arduino proj
 ![TGT gauge circuit](images/TGT_diag.png)
 
 
+![Whole circuit](TBAG_proc_circuit.png)

@@ -32,7 +32,12 @@ void setup() {
 /*the main loop*/
 
 void loop() {
-  //varPos=(float)map(analogRead(VARPIN),0,1024,0,1.0);
+
+  /*read potentiometer position*/
+  varPos=(float)map(analogRead(VARPIN),0,1024,0,1.0);
+
+  /*set PWM*/
+  analogWrite(TGTPIN,(int)(varPos));
 
   return;
 }

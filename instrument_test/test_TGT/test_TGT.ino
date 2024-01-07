@@ -16,7 +16,7 @@
 /*#####################################*/
 /*variables*/
 
-//float varPos;   /*potentiometer position. 0-1*/
+float varPos;   /*potentiometer position. 0-1*/
 
 
 /*#####################################*/

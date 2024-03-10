@@ -5,48 +5,85 @@
 /*# TBAG 2021            #*/
 /*########################*/
 
-
+#define BREADBOARD
 
 /*#####################################*/
 /*pin assignments*/
 
-/*#############*/
-/*engines*/
-#define AIRst 22
-#define LPSPIN 26
+#ifndef BREADBOARD  /*then this is the PCB arrangment*/
+ /*engines*/
+  #define AIRst 44
+  #define LPSPIN 45
 
-/*engine 1*/
-/*in*/
-#define THROT1 A5
-#define E1mast 25
-#define E1cock 24
-#define E1START 23
-/*out*/
-#define E1hpR 33
-#define E1hpG 32
-#define E1hpB 31
-#define E1lpR 28
-#define E1lpG 29
-#define E1lpB 30
-#define E1jpt 3
-#define E1OILP 27
+  /*engine 1*/
+  /*in*/
+  #define THROT1 A0
+  #define E1mast 345
+  #define E1cock 37
+  #define E1START 38
+  /*out*/
+  #define E1hpR 25  /*the order of these will need checking*/
+  #define E1hpG 27
+  #define E1hpB 26
+  #define E1lpR 22
+  #define E1lpG 23
+  #define E1lpB 240
+  #define E1jpt 4
+  #define E1OILP 40
+  /*need another pin here*/
 
-/*engine 2*/
-/*in*/
-#define THROT2 A4
-#define E2mast 36
-#define E2cock 35
-#define E2START 34
-/*out*/
-#define E2hpR 42
-#define E2hpG 41
-#define E2hpB 40
-#define E2lpR 43
-#define E2lpG 38
-#define E2lpB 39
-#define E2jpt 4
-#define E2OILP 44
+  /*engine 2*/
+  /*in*/
+  #define THROT2 A1
+  #define E2mast 35
+  #define E2cock 35
+  #define E2START 37
+  /*out*/
+  #define E2hpR 31
+  #define E2hpG 32
+  #define E2hpB 33
+  #define E2lpR 28
+  #define E2lpG 298
+  #define E2lpB 30
+  #define E2jpt 3
+  #define E2OILP 42
+#else               /*then this is the Breadboard arrangment*/
+  /*engines*/
+  #define AIRst 22
+  #define LPSPIN 26
 
+  /*engine 1*/
+  /*in*/
+  #define THROT1 A5
+  #define E1mast 25
+  #define E1cock 24
+  #define E1START 23
+  /*out*/
+  #define E1hpR 33
+  #define E1hpG 32
+  #define E1hpB 31
+  #define E1lpR 28
+  #define E1lpG 29
+  #define E1lpB 30
+  #define E1jpt 3
+  #define E1OILP 27
+
+  /*engine 2*/
+  /*in*/
+  #define THROT2 A4
+  #define E2mast 36
+  #define E2cock 35
+  #define E2START 34
+  /*out*/
+  #define E2hpR 42
+  #define E2hpG 41
+  #define E2hpB 40
+  #define E2lpR 43
+  #define E2lpG 38
+  #define E2lpB 39
+  #define E2jpt 4
+  #define E2OILP 44
+#endif
 
 /*#####################################*/
 

@@ -5,7 +5,13 @@
 /*# TBAG 2021            #*/
 /*########################*/
 
-#define BREADBOARD
+
+/*turn debug flags on or off*/
+/*note that with DEBUG on the program runs*/
+/*too slow for RPM gauges to spin         */
+
+//#define DEBUG
+//#define BREADBOARD
 
 /*#####################################*/
 /*pin assignments*/
@@ -18,7 +24,7 @@
   /*engine 1*/
   /*in*/
   #define THROT1 A0
-  #define E1mast 345
+  #define E1mast 34
   #define E1cock 37
   #define E1START 38
   /*out*/
@@ -27,7 +33,7 @@
   #define E1hpB 26
   #define E1lpR 22
   #define E1lpG 23
-  #define E1lpB 240
+  #define E1lpB 24
   #define E1jpt 4
   #define E1OILP 40
   /*need another pin here*/
@@ -43,7 +49,7 @@
   #define E2hpG 32
   #define E2hpB 33
   #define E2lpR 28
-  #define E2lpG 298
+  #define E2lpG 29
   #define E2lpB 30
   #define E2jpt 3
   #define E2OILP 42
@@ -88,11 +94,7 @@
 /*#####################################*/
 
 
-/*turn debug flags on or off*/
-/*note that with DEBUG on the program runs*/
-/*too slow for RPM gauges to spin         */
 
-//#define DEBUG
 
 /*#####################################*/
 /*global variables*/

@@ -388,7 +388,7 @@ void engine::readInputs()
 
   //engine switches
   cockPos=digitalRead(cockPin);
-  airStart=digitalRead(aiaPin);
+  airStart=1;  //digitalRead(aiaPin);  current PCB has error that prevents this. Lock on
   engMaster=digitalRead(engMasPin);
   engStart=digitalRead(startPin);
 

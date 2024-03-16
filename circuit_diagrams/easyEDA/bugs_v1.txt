@@ -9,3 +9,6 @@ Two of the ground pins on the RPM H-bridges need soldering to an adjacent ground
 
 Eng 2 oil press 3 needs soldering to ground.
 
+Air start arduino pibk up is the wrong side of resistor. No fix so lock on for now.
+
+

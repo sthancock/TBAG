@@ -10,7 +10,7 @@
 /*note that with DEBUG on the program runs*/
 /*too slow for RPM gauges to spin         */
 
-//#define DEBUG
+#define DEBUG
 //#define BREADBOARD
 
 /*#####################################*/
@@ -586,11 +586,11 @@ void loop() {
 
   // read controls
   eng1.readInputs();
-  eng2.readInputs();
+  //eng2.readInputs();
 
   // determine state
   eng1.determineState();
-  eng2.determineState();
+  //eng2.determineState();
 
   // write outputs
   eng1.writeState();

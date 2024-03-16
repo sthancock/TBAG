@@ -585,16 +585,16 @@ void setup()
 void loop() {
 
   // read controls
-  eng1.readInputs();
-  //eng2.readInputs();
+  //eng1.readInputs();
+  eng2.readInputs();
 
   // determine state
-  eng1.determineState();
-  //eng2.determineState();
+  //eng1.determineState();
+  eng2.determineState();
 
   // write outputs
-  eng1.writeState();
-  //eng2.writeState();
+  //eng1.writeState();
+  eng2.writeState();
 
   return;
 }/*main loop*/

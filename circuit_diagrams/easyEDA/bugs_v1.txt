@@ -1,14 +1,15 @@
 
 
-Some connections were not made in the version 1 PCB.
-
-The connection from the LP spin driver pin and the ribbon connector was missed. This needs soldering from Arduino pin D45 to U10 pin 4
-
-Two of the ground pins on the RPM H-bridges need soldering to an adjacent ground pin.
+Check the resistance values for the TGT resitors and capacitors.
 
 
-Eng 2 oil press 3 needs soldering to ground.
+The connection from the LP spin driver pin and the ribbon connector was missed. This needs soldering from Arduino pin D45 to U10 pin 4. Fixed in rev2.
 
-Air start arduino pibk up is the wrong side of resistor. No fix so lock on for now.
+Two of the ground pins on the RPM H-bridges need soldering to an adjacent ground pin. Fixed in rev2.
+
+
+Eng 2 oil press 3 needs soldering to ground. Fixed in rev2.
+
+Air start arduino pin is on the wrong side of resistor. No fix so lock on for now. Fixed in rev2.
 
 
